@@ -13,7 +13,7 @@ import core.Types.JsFn;
 import utils.Fn;
 import rm.Globals;
 
-using LunaChatter.ChatterExtensions;
+using ChatterExtensions;
 using Lambda;
 using StringTools;
 using core.NumberExtensions;
@@ -190,55 +190,5 @@ class LunaChatter {
 
   public static function closeChatterWindow(win: ChatterWindow) {
     win.close();
-  }
-}
-
-class ChatterExtensions {
-  public static function enqueue<T>(arr: Array<T>, element: T) {
-    arr.push(element);
-  }
-
-  public static function dequeue<T>(arr: Array<T>): T {
-    return arr.shift();
-  }
-
-  public static function offsetAboveEvent(evt: Game_Event) {
-    var eventScreenXCenter = evt.screenX() - 24;
-    var eventScreenYAbove = evt.screenY() - 64;
-    return { x: eventScreenXCenter, y: eventScreenYAbove };
-  }
-
-  public static function offsetByEventSprite(charSprite: Sprite_Character) {
-    charSprite.updateFrame();
-    return { x: charSprite.__frame.width / 2, y: charSprite.__frame.height };
-  }
-
-  public function scanForPlayer() {
-    var eventX = this.event.screenX();
-    var eventY = this.event.screenY();
-    var playerX = Globals.GamePlayer.screenX();
-    var playerY = Globals.GamePlayer.screenY();
-
-    var inRange = Math.sqrt(Math.pow(playerX - eventX, 2)
-      + Math.pow(playerY - eventY, 2)) < LunaChatter.CHParams.eventWindowRange;
-
-    if (inRange) {
-      this.emit(ChatterEvents.PLAYERINRANGE, this);
-    } else {
-      this.emit(ChatterEvents.PLAYEROUTOFRANGE, this);
-    }
-  }
-
-  public function scanForHover() {
-    var eventScreenX = this.event.screenX();
-    var eventScreenY = this.event.screenY();
-    var inputPosition = { x: TouchInput.x, y: TouchInput.y };
-
-    if (inputPosition.x.withinRangef(eventScreenX, eventScreenX + 48)
-      && inputPosition.y.withinRangef(eventScreenY - 48, eventScreenY)) {
-      this.emit(ChatterEvents.ONHOVER, this);
-    } else {
-      this.emit(ChatterEvents.ONHOVEROUT, this);
-    }
   }
 }

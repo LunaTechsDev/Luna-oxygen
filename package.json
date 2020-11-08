@@ -4,6 +4,7 @@
   "description": "A base project for creating tools and plugins for RPGMakerMV/MZ.",
   "main": "index.js",
   "scripts": {
+    "build": "haxe compile.hxml",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "nodemon --watch src -e hx,hxml,xml --exec haxe --times --connect 7010 compile.hxml"
   },
@@ -29,8 +30,12 @@
   "dependencies": {
     "nodemon": "^2.0.4",
     "lix": "^15.9.0"
-  },  "execMap": {
+  },
+  "execMap": {
     "hxml": "haxe",
     "hx": "haxe"
+  },
+  "devDependencies": {
+    "@lunatechs/lunatea-napkin": "^1.5.1"
   }
 }
