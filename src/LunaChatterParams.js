@@ -8,6 +8,7 @@
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
 
+
 @param fadeInTime
 @text Fade In Time
 @desc The time in frames to fade in the chatter window as it enters the screen.
@@ -17,6 +18,12 @@
 @text Fade Out Time
 @desc The time in frames to fade out the chatter window as it leaves the screen.
 @default 120
+
+@param enableEventNames
+@text Enable Event Names
+@desc Enables event names in the editor
+@default true
+
 
 @param eventWindowRange
 @text Event Window Range
