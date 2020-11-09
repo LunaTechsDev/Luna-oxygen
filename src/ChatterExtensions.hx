@@ -28,7 +28,7 @@ class ChatterExtensions {
   }
 
   public static function processTemplateString(win: Window_Base, templateIndex: Int, textState: TextState) {
-    var templateStr: TemplateString = LunaChatter.CHParams.templateStrings.find((ts) -> ts.id == templateIndex);
+    var templateStr: TemplateString = Main.CHParams.templateStrings.find((ts) -> ts.id == templateIndex);
     var text = templateStr.text;
     #if compileMV
     win.drawTextEx(text, textState.x, textState.y);
@@ -38,8 +38,7 @@ class ChatterExtensions {
   }
 
   public static function processJSTemplateString(win: Window_Base, templateIndex: Int, textState: TextState) {
-    var templateJsStr: JSTemplate = LunaChatter.CHParams.templateJSStrings.find((ts: Dynamic) ->
-      ts.id == templateIndex);
+    var templateJsStr: JSTemplate = Main.CHParams.templateJSStrings.find((ts: Dynamic) -> ts.id == templateIndex);
     var code = templateJsStr.code;
     var text = js.Syntax.code('new Function({0})()', code);
     trace(templateJsStr);

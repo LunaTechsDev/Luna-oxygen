@@ -19,6 +19,10 @@
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
 
+@param maxChatterWindows
+@text Maximum Chatter Windows
+@desc The maximum number of chatter windows available on screen
+@default 10
 
 @param fadeInTime
 @text Fade In Time
@@ -32,7 +36,7 @@
 
 @param enableEventNames
 @text Enable Event Names
-@desc Enables event names in the editor
+@desc Enables event names in the editor (true/false)
 @default true
 
 @param eventWindowRange
@@ -42,8 +46,8 @@
 
 @param anchorPosition
 @text Anchor Position
-@desc The anchor position of the chatter notification windows on the screen.
-@default right
+@desc The anchor position of the  notification windows (topRight, bottomRight, topLeft, bottomLeft).
+@default topRight
 
 @param backgroundType
 @text Background Type
@@ -256,6 +260,31 @@ SOFTWARE
       charSprite.updateFrame();
       return { x: charSprite._frame.width / 2, y: charSprite._frame.height };
     }
+    static processTemplateString(win, templateIndex, textState) {
+      win.drawTextEx(
+        Lambda.find(LunaChatter.CHParams.templateStrings, function (ts) {
+          return ts.id == templateIndex;
+        }).text,
+        textState.x,
+        textState.y
+      );
+    }
+    static processJSTemplateString(win, templateIndex, textState) {
+      let templateJsStr = Lambda.find(
+        LunaChatter.CHParams.templateJSStrings,
+        function (ts) {
+          return ts.id == templateIndex;
+        }
+      );
+      let text = new Function(templateJsStr.code)();
+      haxe_Log.trace(templateJsStr, {
+        fileName: "src/ChatterExtensions.hx",
+        lineNumber: 44,
+        className: "ChatterExtensions",
+        methodName: "processJSTemplateString",
+      });
+      win.drawTextEx(text, textState.x, textState.x);
+    }
   }
 
   ChatterExtensions.__name__ = true;
@@ -308,19 +337,22 @@ SOFTWARE
       let string3 = LunaChatter.params["backgroundType"];
       let tmp4 = parseInt(string3, 10);
       let string4 = LunaChatter.params["eventBackgroundType"];
+      let tmp5 = parseInt(string4, 10);
+      let tmp6 = JsonEx.parse(LunaChatter.params["templateStrings"]);
+      let tmp7 = JsonEx.parse(LunaChatter.params["templateJSStrings"]);
+      let tmp8 = LunaChatter.params["enableEventNames"].trim() == "true";
+      let string5 = LunaChatter.params["maxChatterWindows"];
       LunaChatter.CHParams = {
         fadeInTime: tmp,
         fadeOutTime: tmp1,
         eventWindowRange: tmp2,
         anchorPosition: tmp3,
         backgroundType: tmp4,
-        eventBackgroundType: parseInt(string4, 10),
-        templateStrings: JsonEx.parse(LunaChatter.params["templateStrings"]),
-        templateJSStrings: JsonEx.parse(
-          LunaChatter.params["templateJSStrings"]
-        ),
-        enableEventNames:
-          LunaChatter.params["enableEventNames"].trim() == "true",
+        eventBackgroundType: tmp5,
+        templateStrings: tmp6,
+        templateJSStrings: tmp7,
+        enableEventNames: tmp8,
+        maxChatterWindows: parseInt(string5, 10),
       };
       let _this = LunaChatter.CHParams.templateJSStrings;
       let result = new Array(_this.length);
@@ -340,7 +372,12 @@ SOFTWARE
         result1[i] = JsonEx.parse(_this1[i]);
       }
       LunaChatter.CHParams.templateStrings = result1;
-      console.log("src/LunaChatter.hx:47:", LunaChatter.CHParams);
+      haxe_Log.trace(LunaChatter.CHParams, {
+        fileName: "src/Main.hx",
+        lineNumber: 43,
+        className: "Main",
+        methodName: "main",
+      });
 
       //=============================================================================
       // Event Hooks
@@ -350,10 +387,173 @@ SOFTWARE
       //=============================================================================
       // Scene_Map
       //=============================================================================
+      let _Scene_Map_setupLCNotificationEvents =
+        Scene_Map.prototype.setupLCNotificationEvents;
+      Scene_Map.prototype.setupLCNotificationEvents = function () {
+        let listener = LunaChatter.ChatterEmitter;
+        listener.on("pushNotification", function (text) {
+          let win = LunaChatter.chatterWindows.pop();
+          win.drawText(text, 0, 0, win.contentsWidth(), "left");
+          win.move(0, 0);
+          listener.emit("queue", win);
+        });
+      };
       let _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
       Scene_Map.prototype.createAllWindows = function () {
         _Scene_Map_createAllWindows.call(this);
-        LunaChatter.createAllEventWindows(this);
+        this.createAllLCWindows();
+        this.createAllLCEventWindows();
+        this.setupLCNotificationEvents();
+      };
+      let _Scene_Map_createAllLCWindows =
+        Scene_Map.prototype.createAllLCWindows;
+      Scene_Map.prototype.createAllLCWindows = function () {
+        let _g = 0;
+        let _g1 = LunaChatter.CHParams.maxChatterWindows;
+        while (_g < _g1) {
+          let x = _g++;
+          let pos;
+          switch (LunaChatter.CHParams.anchorPosition) {
+            case "bottomLeft":
+              pos = { x: 0, y: Graphics.boxHeight };
+              break;
+            case "bottomRight":
+              pos = { x: Graphics.boxWidth, y: Graphics.boxHeight };
+              break;
+            case "topLeft":
+              pos = { x: 0, y: 0 };
+              break;
+            case "topRight":
+              pos = { x: Graphics.boxWidth, y: 0 };
+              break;
+          }
+
+          let chatterWindow = new ChatterWindow(pos.x, pos.y, 200, 75);
+          LunaChatter.chatterWindows.push(chatterWindow);
+          this.addWindow(chatterWindow);
+          haxe_Log.trace("Created ", {
+            fileName: "src/SceneMap.hx",
+            lineNumber: 45,
+            className: "SceneMap",
+            methodName: "createAllLCWindows",
+            customParams: [x + 1, " windows"],
+          });
+        }
+      };
+      let _Scene_Map_createAllLCEventWindows =
+        Scene_Map.prototype.createAllLCEventWindows;
+      Scene_Map.prototype.createAllLCEventWindows = function () {
+        let mapEvents = $gameMap.events();
+        let _gthis = this;
+        if (LunaChatter.CHParams.enableEventNames) {
+          Lambda.iter(mapEvents, function (event) {
+            let chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
+            chatterEventWindow.setEvent(event);
+            Lambda.iter(_gthis._spriteset._characterSprites, function (
+              charSprite
+            ) {
+              if (
+                charSprite.x == event.screenX() &&
+                charSprite.y == event.screenY()
+              ) {
+                chatterEventWindow.setEventSprite(charSprite);
+                charSprite.addChild(chatterEventWindow);
+                charSprite.bitmap.addLoadListener(function (_) {
+                  LunaChatter.positionEventWindow(chatterEventWindow);
+                });
+                chatterEventWindow.close();
+              }
+            });
+            chatterEventWindow.setupEvents(
+              $bind(_gthis, _gthis.setupGameEvtEvents)
+            );
+            chatterEventWindow.open();
+          });
+        }
+      };
+      let _Scene_Map_setupGameEvtEvents =
+        Scene_Map.prototype.setupGameEvtEvents;
+      Scene_Map.prototype.setupGameEvtEvents = function (currentWindow) {
+        let _gthis = this;
+        currentWindow.on("playerInRange", function (win) {
+          if (!win.playerInRange) {
+            _gthis.openChatterWindow(win);
+            win.playerInRange = true;
+          }
+        });
+        currentWindow.on("playerOutOfRange", function (win) {
+          if (win.playerInRange) {
+            _gthis.closeChatterWindow(win);
+            win.playerInRange = false;
+          }
+        });
+        currentWindow.on("onHover", function (win) {
+          if (!win.hovered && !win.playerInRange) {
+            _gthis.openChatterWindow(win);
+            win.hovered = true;
+          }
+        });
+        currentWindow.on("onHoverOut", function (win) {
+          if (win.hovered) {
+            _gthis.closeChatterWindow(win);
+            win.hovered = false;
+          }
+        });
+        currentWindow.on("paint", function (win) {
+          win.drawText(
+            win.event.event().name,
+            0,
+            0,
+            win.contentsWidth(),
+            "center"
+          );
+        });
+      };
+      let _Scene_Map_showChatterWindow = Scene_Map.prototype.showChatterWindow;
+      Scene_Map.prototype.showChatterWindow = function (win) {
+        win.show();
+      };
+      let _Scene_Map_hideChatterWindow = Scene_Map.prototype.hideChatterWindow;
+      Scene_Map.prototype.hideChatterWindow = function (win) {
+        win.hide();
+      };
+      let _Scene_Map_openChatterWindow = Scene_Map.prototype.openChatterWindow;
+      Scene_Map.prototype.openChatterWindow = function (win) {
+        win.open();
+      };
+      let _Scene_Map_closeChatterWindow =
+        Scene_Map.prototype.closeChatterWindow;
+      Scene_Map.prototype.closeChatterWindow = function (win) {
+        win.close();
+      };
+
+      //=============================================================================
+      // Window_Base
+      //=============================================================================
+      let _Window_Base_processEscapeCharacter =
+        Window_Base.prototype.processEscapeCharacter;
+      Window_Base.prototype.processEscapeCharacter = function (
+        code,
+        textState
+      ) {
+        switch (code) {
+          case "LCJS":
+            ChatterExtensions.processJSTemplateString(
+              this,
+              this.obtainEscapeParam(textState),
+              textState
+            );
+            break;
+          case "LCT":
+            ChatterExtensions.processTemplateString(
+              this,
+              this.obtainEscapeParam(textState),
+              textState
+            );
+            break;
+          default:
+            _Window_Base_processEscapeCharacter.call(this, code, textState);
+        }
       };
     }
     static setupEvents() {
@@ -363,64 +563,87 @@ SOFTWARE
       LunaChatter.ChatterEmitter.on("dequeue", function () {
         LunaChatter.dequeueChatterWindow();
       });
+    }
+    static showChatterEventWindow() {}
+    static positionEventWindow(win) {
+      let offset = ChatterExtensions.offsetByEventSprite(win.eventSprite);
+      win.x -= win.width / 2;
+      win.y -= win.height + offset.y;
+    }
+    static pushTextNotification(text) {
+      LunaChatter.ChatterEmitter.emit("pushNotification", text);
+    }
+    static queueChatterWindow(win) {
+      ChatterExtensions.enqueue(LunaChatter.chatterQueue, win);
+    }
+    static dequeueChatterWindow() {
+      return ChatterExtensions.dequeue(LunaChatter.chatterQueue);
+    }
+  }
 
-      //=============================================================================
-      // Window_Base
-      //=============================================================================
-      let _WindowBaseEscapeCharacter =
-        Window_Base.prototype.processEscapeCharacter;
-      Window_Base.prototype.processEscapeCharacter = function (
-        code,
-        textState
-      ) {
-        let winBase = this;
-        switch (code) {
-          case "LCJS":
-            LunaChatter.processJSTemplateString(
-              winBase,
-              winBase.obtainEscapeParam(textState),
-              textState
-            );
+  $hx_exports["LunaChatter"] = LunaChatter;
+  LunaChatter.__name__ = true;
+  Math.__name__ = true;
+  class SceneMap extends Scene_Map {
+    constructor() {
+      super();
+    }
+    setupLCNotificationEvents() {
+      let listener = LunaChatter.ChatterEmitter;
+      listener.on("pushNotification", function (text) {
+        let win = LunaChatter.chatterWindows.pop();
+        win.drawText(text, 0, 0, win.contentsWidth(), "left");
+        win.move(0, 0);
+        listener.emit("queue", win);
+      });
+    }
+    createAllWindows() {
+      _Scene_Map_createAllWindows.call(this);
+      this.createAllLCWindows();
+      this.createAllLCEventWindows();
+      this.setupLCNotificationEvents();
+    }
+    createAllLCWindows() {
+      let _g = 0;
+      let _g1 = LunaChatter.CHParams.maxChatterWindows;
+      while (_g < _g1) {
+        let x = _g++;
+        let pos;
+        switch (LunaChatter.CHParams.anchorPosition) {
+          case "bottomLeft":
+            pos = { x: 0, y: Graphics.boxHeight };
             break;
-          case "LCT":
-            LunaChatter.processTemplateString(
-              winBase,
-              winBase.obtainEscapeParam(textState),
-              textState
-            );
+          case "bottomRight":
+            pos = { x: Graphics.boxWidth, y: Graphics.boxHeight };
             break;
-          default:
-            _WindowBaseEscapeCharacter.call(this, code, textState);
+          case "topLeft":
+            pos = { x: 0, y: 0 };
+            break;
+          case "topRight":
+            pos = { x: Graphics.boxWidth, y: 0 };
+            break;
         }
-      };
+
+        let chatterWindow = new ChatterWindow(pos.x, pos.y, 200, 75);
+        LunaChatter.chatterWindows.push(chatterWindow);
+        this.addWindow(chatterWindow);
+        haxe_Log.trace("Created ", {
+          fileName: "src/SceneMap.hx",
+          lineNumber: 45,
+          className: "SceneMap",
+          methodName: "createAllLCWindows",
+          customParams: [x + 1, " windows"],
+        });
+      }
     }
-    static processTemplateString(win, templateIndex, textState) {
-      win.drawTextEx(
-        Lambda.find(LunaChatter.CHParams.templateStrings, function (ts) {
-          return ts.id == templateIndex;
-        }).text,
-        textState.x,
-        textState.y
-      );
-    }
-    static processJSTemplateString(win, templateIndex, textState) {
-      let templateJsStr = Lambda.find(
-        LunaChatter.CHParams.templateJSStrings,
-        function (ts) {
-          return ts.id == templateIndex;
-        }
-      );
-      let text = new Function(templateJsStr.code)();
-      console.log("src/LunaChatter.hx:94:", templateJsStr);
-      win.drawTextEx(text, textState.x, textState.x);
-    }
-    static createAllEventWindows(scene) {
+    createAllLCEventWindows() {
       let mapEvents = $gameMap.events();
+      let _gthis = this;
       if (LunaChatter.CHParams.enableEventNames) {
         Lambda.iter(mapEvents, function (event) {
           let chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
           chatterEventWindow.setEvent(event);
-          Lambda.iter(scene._spriteset._characterSprites, function (
+          Lambda.iter(_gthis._spriteset._characterSprites, function (
             charSprite
           ) {
             if (
@@ -435,33 +658,36 @@ SOFTWARE
               chatterEventWindow.close();
             }
           });
-          chatterEventWindow.setupEvents(LunaChatter.setupGameEvtEvents);
+          chatterEventWindow.setupEvents(
+            $bind(_gthis, _gthis.setupGameEvtEvents)
+          );
           chatterEventWindow.open();
         });
       }
     }
-    static setupGameEvtEvents(currentWindow) {
+    setupGameEvtEvents(currentWindow) {
+      let _gthis = this;
       currentWindow.on("playerInRange", function (win) {
         if (!win.playerInRange) {
-          LunaChatter.openChatterWindow(win);
+          _gthis.openChatterWindow(win);
           win.playerInRange = true;
         }
       });
       currentWindow.on("playerOutOfRange", function (win) {
         if (win.playerInRange) {
-          LunaChatter.closeChatterWindow(win);
+          _gthis.closeChatterWindow(win);
           win.playerInRange = false;
         }
       });
       currentWindow.on("onHover", function (win) {
         if (!win.hovered && !win.playerInRange) {
-          LunaChatter.openChatterWindow(win);
+          _gthis.openChatterWindow(win);
           win.hovered = true;
         }
       });
       currentWindow.on("onHoverOut", function (win) {
         if (win.hovered) {
-          LunaChatter.closeChatterWindow(win);
+          _gthis.closeChatterWindow(win);
           win.hovered = false;
         }
       });
@@ -475,46 +701,72 @@ SOFTWARE
         );
       });
     }
-    static showChatterEventWindow() {}
-    static queueChatterWindow(win) {
-      ChatterExtensions.enqueue(LunaChatter.chatterQueue, win);
-    }
-    static dequeueChatterWindow() {
-      return ChatterExtensions.dequeue(LunaChatter.chatterQueue);
-    }
-    static showChatterWindow(win) {
-      win.show();
-    }
-    static hideChatterWindow(win) {
-      win.hide();
-    }
-    static openChatterWindow(win) {
+    openChatterWindow(win) {
       win.open();
     }
-    static positionEventWindow(win) {
-      let offset = ChatterExtensions.offsetByEventSprite(win.eventSprite);
-      win.x -= win.width / 2;
-      win.y -= win.height + offset.y;
-    }
-    static closeChatterWindow(win) {
+    closeChatterWindow(win) {
       win.close();
     }
   }
 
-  $hx_exports["LunaChatter"] = LunaChatter;
-  LunaChatter.__name__ = true;
-  Math.__name__ = true;
-  class SceneMap extends Scene_Map {
-    constructor() {
-      super();
-    }
-    createAllWindows() {
-      _Scene_Map_createAllWindows.call(this);
-      LunaChatter.createAllEventWindows(this);
+  SceneMap.__name__ = true;
+  class Std {
+    static string(s) {
+      return js_Boot.__string_rec(s, "");
     }
   }
 
-  SceneMap.__name__ = true;
+  Std.__name__ = true;
+  class WindowBase extends Window_Base {
+    constructor(x, y, width, height) {
+      super(x, y, width, height);
+    }
+    processEscapeCharacter(code, textState) {
+      switch (code) {
+        case "LCJS":
+          ChatterExtensions.processJSTemplateString(
+            this,
+            this.obtainEscapeParam(textState),
+            textState
+          );
+          break;
+        case "LCT":
+          ChatterExtensions.processTemplateString(
+            this,
+            this.obtainEscapeParam(textState),
+            textState
+          );
+          break;
+        default:
+          _Window_Base_processEscapeCharacter.call(this, code, textState);
+      }
+    }
+  }
+
+  WindowBase.__name__ = true;
+  class haxe_Log {
+    static formatOutput(v, infos) {
+      let str = Std.string(v);
+      if (infos == null) {
+        return str;
+      }
+      let pstr = infos.fileName + ":" + infos.lineNumber;
+      if (infos.customParams != null) {
+        let _g = 0;
+        let _g1 = infos.customParams;
+        while (_g < _g1.length) str += ", " + Std.string(_g1[_g++]);
+      }
+      return pstr + ": " + str;
+    }
+    static trace(v, infos) {
+      let str = haxe_Log.formatOutput(v, infos);
+      if (typeof console != "undefined" && console.log != null) {
+        console.log(str);
+      }
+    }
+  }
+
+  haxe_Log.__name__ = true;
   class haxe_iterators_ArrayIterator {
     constructor(array) {
       this.current = 0;
@@ -657,6 +909,20 @@ SOFTWARE
     if (o instanceof Array) return new haxe_iterators_ArrayIterator(o);
     else return o.iterator();
   }
+  var $_;
+  function $bind(o, m) {
+    if (m == null) return null;
+    if (m.__id__ == null) m.__id__ = $global.$haxeUID++;
+    var f;
+    if (o.hx__closures__ == null) o.hx__closures__ = {};
+    else f = o.hx__closures__[m.__id__];
+    if (f == null) {
+      f = m.bind(o);
+      o.hx__closures__[m.__id__] = f;
+    }
+    return f;
+  }
+  $global.$haxeUID |= 0;
   String.__name__ = true;
   Array.__name__ = true;
   js_Boot.__toStr = {}.toString;
@@ -689,5 +955,11 @@ SOFTWARE
     : typeof self != "undefined"
     ? self
     : this,
-  {}
+  typeof window != "undefined"
+    ? window
+    : typeof global != "undefined"
+    ? global
+    : typeof self != "undefined"
+    ? self
+    : this
 );

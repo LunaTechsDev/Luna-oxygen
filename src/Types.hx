@@ -25,6 +25,7 @@ typedef CHParams = {
   var templateStrings: Array<TemplateString>;
   var templateJSStrings: Array<JSTemplate>;
   var enableEventNames: Bool;
+  var maxChatterWindows: Int;
 };
 
 enum abstract ChatterType(String) from String to String {
@@ -45,6 +46,7 @@ enum abstract AnchorPos(String) from String to String {
 enum abstract ChatterEvents(String) from String to String {
   public var SHOW = 'show';
   public var PUSH = 'push';
+  public var PUSHNOTIF = 'pushNotification';
   public var HIDE = 'hide';
   public var CLOSE = 'close';
   public var OPEN = 'open';

@@ -8,6 +8,10 @@
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
 
+@param maxChatterWindows
+@text Maximum Chatter Windows
+@desc The maximum number of chatter windows available on screen
+@default 10
 
 @param fadeInTime
 @text Fade In Time
@@ -31,8 +35,8 @@
 
 @param anchorPosition
 @text Anchor Position
-@desc The anchor position of the chatter notification windows on the screen.
-@default right
+@desc The anchor position of the  notification windows (topRight, bottomRight, topLeft, bottomLeft).
+@default topRight
 
 @param backgroundType
 @text Background Type

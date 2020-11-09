@@ -24,7 +24,7 @@
 # Note you can call an hxml file inside an hxml file for build purposes.
 # For Compiling Separate JavaScript Files
 --macro macros.MacroTools.includeJsLib("./src/LunaChatterParams.js")
--main LunaChatter
+-main Main
 --each
 
 --next

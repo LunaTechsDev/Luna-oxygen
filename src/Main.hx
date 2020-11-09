@@ -15,7 +15,7 @@ using core.NumberExtensions;
 
 @:native('LunaChatter')
 @:expose('LunaChatter')
-class LunaChatter {
+class Main {
   public static var ChatterEmitter = Amaryllis.createEventEmitter();
   public static var CHParams: CHParams;
   public static var params = Globals.Plugins.filter((plugin) ->
@@ -34,7 +34,8 @@ class LunaChatter {
       eventBackgroundType: Fn.parseIntJs(params['eventBackgroundType']),
       templateStrings: JsonEx.parse(params['templateStrings']),
       templateJSStrings: JsonEx.parse(params['templateJSStrings']),
-      enableEventNames: params['enableEventNames'].trim() == 'true'
+      enableEventNames: params['enableEventNames'].trim() == 'true',
+      maxChatterWindows: Fn.parseIntJs(params['maxChatterWindows'])
     }
 
     CHParams.templateJSStrings = cast CHParams.templateJSStrings.map((ts) -> JsonEx.parse(cast ts));
@@ -62,66 +63,6 @@ class LunaChatter {
 
   // ============================
   // Chatter Event Windows
-  public static function createAllEventWindows(scene: RmScene_Map) {
-    // Scan Events With Notetags to show event information
-    var mapEvents = Globals.GameMap.events();
-    // Add NoteTag Check Later -- + Add Events
-    if (CHParams.enableEventNames) {
-      mapEvents.iter((event) -> {
-        var chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
-        chatterEventWindow.setEvent(event);
-
-        scene.__spriteset.__characterSprites.iter((charSprite) -> {
-          if (charSprite.x == event.screenX() && charSprite.y == event.screenY()) {
-            chatterEventWindow.setEventSprite(charSprite);
-            charSprite.addChild(chatterEventWindow);
-            charSprite.bitmap.addLoadListener((_) -> {
-              positionEventWindow(chatterEventWindow);
-            });
-            chatterEventWindow.close();
-          }
-        });
-
-        chatterEventWindow.setupEvents(cast setupGameEvtEvents);
-        chatterEventWindow.open();
-      });
-    }
-  }
-
-  public static function setupGameEvtEvents(currentWindow: ChatterEventWindow) {
-    currentWindow.on(ChatterEvents.PLAYERINRANGE, (win: ChatterEventWindow) -> {
-      if (!win.playerInRange) {
-        openChatterWindow(win);
-        win.playerInRange = true;
-      }
-    });
-
-    currentWindow.on(ChatterEvents.PLAYEROUTOFRANGE, (win: ChatterEventWindow) -> {
-      if (win.playerInRange) {
-        closeChatterWindow(win);
-        win.playerInRange = false;
-      }
-    });
-
-    currentWindow.on(ChatterEvents.ONHOVER, (win: ChatterEventWindow) -> {
-      if (!win.hovered && !win.playerInRange) {
-        openChatterWindow(win);
-        win.hovered = true;
-      }
-    });
-
-    currentWindow.on(ChatterEvents.ONHOVEROUT, (win: ChatterEventWindow) -> {
-      if (win.hovered) {
-        closeChatterWindow(win);
-        win.hovered = false;
-      }
-    });
-
-    currentWindow.on(ChatterEvents.PAINT, (win: ChatterEventWindow) -> {
-      win.drawText(win.event.event().name, 0, 0, win.contentsWidth(), 'center');
-    });
-  }
-
   public static function showChatterEventWindow() {
     // Update Position On Within Range
   }
@@ -132,31 +73,17 @@ class LunaChatter {
     win.y -= (win.height + (offset.y));
   }
 
-  // ======================
-  // Chatter Windows
+  public static function pushTextNotification(text: String) {
+    ChatterEmitter.emit(ChatterEvents.PUSHNOTIF, text);
+  }
+
   public static function queueChatterWindow(win: ChatterWindow) {
     // Perform Show Transition
     chatterQueue.enqueue(win);
   }
 
   public static function dequeueChatterWindow(): ChatterWindow {
-    // Perform Transition
+    // Perform Exit Transition
     return chatterQueue.dequeue();
-  }
-
-  public static function showChatterWindow(win: ChatterWindow) {
-    win.show();
-  }
-
-  public static function hideChatterWindow(win: ChatterWindow) {
-    win.hide();
-  }
-
-  public static function openChatterWindow(win: ChatterWindow) {
-    win.open();
-  }
-
-  public static function closeChatterWindow(win: ChatterWindow) {
-    win.close();
   }
 }

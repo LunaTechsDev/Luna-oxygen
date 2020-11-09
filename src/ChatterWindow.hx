@@ -14,7 +14,7 @@ class ChatterWindow extends Window_Base {
   }
 
   public function setBGType() {
-    this.setBackgroundType(LunaChatter.CHParams.backgroundType);
+    this.setBackgroundType(Main.CHParams.backgroundType);
   }
 
   public function setupEvents(fn: (win: ChatterWindow) -> Void) {

@@ -19,7 +19,7 @@ class ChatterEventWindow extends ChatterWindow {
   }
 
   public override function setBGType() {
-    this.setBackgroundType(LunaChatter.CHParams.eventBackgroundType);
+    this.setBackgroundType(Main.CHParams.eventBackgroundType);
   }
 
   public function setEvent(evt: Game_Event) {
@@ -44,7 +44,7 @@ class ChatterEventWindow extends ChatterWindow {
     var playerY = Globals.GamePlayer.screenY();
 
     var inRange = Math.sqrt(Math.pow(playerX - eventX, 2)
-      + Math.pow(playerY - eventY, 2)) < LunaChatter.CHParams.eventWindowRange;
+      + Math.pow(playerY - eventY, 2)) < Main.CHParams.eventWindowRange;
 
     if (inRange) {
       this.emit(ChatterEvents.PLAYERINRANGE, this);
