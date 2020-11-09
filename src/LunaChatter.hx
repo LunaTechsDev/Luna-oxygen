@@ -1,15 +1,10 @@
 import Types;
 import macros.FnMacros;
 import rm.core.JsonEx;
-import rm.sprites.Sprite_Character;
-import rm.core.TouchInput;
-import rm.objects.Game_Event;
 import rm.scenes.Scene_Map as RmScene_Map;
-import rm.windows.Window_Base;
+import rm.windows.Window_Base as RmWindow_Base;
 import core.Amaryllis;
-import rm.types.RM.TextState;
 import utils.Comment;
-import core.Types.JsFn;
 import utils.Fn;
 import rm.Globals;
 
@@ -51,6 +46,9 @@ class LunaChatter {
 
     Comment.title('Scene_Map');
     FnMacros.jsPatch(true, RmScene_Map, SceneMap);
+
+    Comment.title('Window_Base');
+    FnMacros.jsPatch(true, RmWindow_Base, WindowBase);
   }
 
   public static function setupEvents() {
@@ -60,45 +58,10 @@ class LunaChatter {
     ChatterEmitter.on(ChatterEvents.DEQUEUE, () -> {
       dequeueChatterWindow();
     });
-
-    Comment.title('Window_Base');
-    var _WindowBaseEscapeCharacter: JsFn = Fn.proto(Window_Base).processEscapeCharacterR;
-    Fn.proto(Window_Base).processEscapeCharacterD = (code: String, textState: TextState) -> {
-      var winBase: Window_Base = Fn.self;
-      switch (code) {
-        case 'LCT':
-          processTemplateString(winBase, cast winBase.obtainEscapeParam(textState), textState);
-        case 'LCJS':
-          processJSTemplateString(winBase, cast winBase.obtainEscapeParam(textState), textState);
-        case _:
-          _WindowBaseEscapeCharacter.call(Fn.self, code, textState);
-      }
-    };
   }
 
-  public static function processTemplateString(win: Window_Base, templateIndex: Int, textState: TextState) {
-    var templateStr: TemplateString = LunaChatter.CHParams.templateStrings.find((ts) -> ts.id == templateIndex);
-    var text = templateStr.text;
-    #if compileMV
-    win.drawTextEx(text, textState.x, textState.y);
-    #else
-    win.drawTextEx(text, textState.x, textState.y, win.contentsWidth());
-    #end
-  }
-
-  public static function processJSTemplateString(win: Window_Base, templateIndex: Int, textState: TextState) {
-    var templateJsStr: JSTemplate = LunaChatter.CHParams.templateJSStrings.find((ts: Dynamic) ->
-      ts.id == templateIndex);
-    var code = templateJsStr.code;
-    var text = js.Syntax.code('new Function({0})()', code);
-    trace(templateJsStr);
-    #if compileMV
-    win.drawTextEx(text, textState.x, textState.x);
-    #else
-    win.drawTextEx(text, textState.x, textState.y, win.contentsWidth());
-    #end
-  }
-
+  // ============================
+  // Chatter Event Windows
   public static function createAllEventWindows(scene: RmScene_Map) {
     // Scan Events With Notetags to show event information
     var mapEvents = Globals.GameMap.events();
@@ -163,6 +126,14 @@ class LunaChatter {
     // Update Position On Within Range
   }
 
+  public static function positionEventWindow(win: ChatterEventWindow) {
+    var offset = win.eventSprite.offsetByEventSprite();
+    win.x -= win.width / 2;
+    win.y -= (win.height + (offset.y));
+  }
+
+  // ======================
+  // Chatter Windows
   public static function queueChatterWindow(win: ChatterWindow) {
     // Perform Show Transition
     chatterQueue.enqueue(win);
@@ -183,12 +154,6 @@ class LunaChatter {
 
   public static function openChatterWindow(win: ChatterWindow) {
     win.open();
-  }
-
-  public static function positionEventWindow(win: ChatterEventWindow) {
-    var offset = win.eventSprite.offsetByEventSprite();
-    win.x -= win.width / 2;
-    win.y -= (win.height + (offset.y));
   }
 
   public static function closeChatterWindow(win: ChatterWindow) {
