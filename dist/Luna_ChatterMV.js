@@ -35,7 +35,6 @@
 @desc Enables event names in the editor
 @default true
 
-
 @param eventWindowRange
 @text Event Window Range
 @desc The radius in pixels in which the player will see the chatter window.
@@ -320,6 +319,8 @@ SOFTWARE
         templateJSStrings: JsonEx.parse(
           LunaChatter.params["templateJSStrings"]
         ),
+        enableEventNames:
+          LunaChatter.params["enableEventNames"].trim() == "true",
       };
       let _this = LunaChatter.CHParams.templateJSStrings;
       let result = new Array(_this.length);
@@ -339,7 +340,7 @@ SOFTWARE
         result1[i] = JsonEx.parse(_this1[i]);
       }
       LunaChatter.CHParams.templateStrings = result1;
-      console.log("src/LunaChatter.hx:46:", LunaChatter.CHParams);
+      console.log("src/LunaChatter.hx:47:", LunaChatter.CHParams);
 
       //=============================================================================
       // Event Hooks
@@ -410,29 +411,34 @@ SOFTWARE
         }
       );
       let text = new Function(templateJsStr.code)();
-      console.log("src/LunaChatter.hx:93:", templateJsStr);
+      console.log("src/LunaChatter.hx:94:", templateJsStr);
       win.drawTextEx(text, textState.x, textState.x);
     }
     static createAllEventWindows(scene) {
-      Lambda.iter($gameMap.events(), function (event) {
-        let chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
-        chatterEventWindow.setEvent(event);
-        Lambda.iter(scene._spriteset._characterSprites, function (charSprite) {
-          if (
-            charSprite.x == event.screenX() &&
-            charSprite.y == event.screenY()
+      let mapEvents = $gameMap.events();
+      if (LunaChatter.CHParams.enableEventNames) {
+        Lambda.iter(mapEvents, function (event) {
+          let chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
+          chatterEventWindow.setEvent(event);
+          Lambda.iter(scene._spriteset._characterSprites, function (
+            charSprite
           ) {
-            chatterEventWindow.setEventSprite(charSprite);
-            charSprite.addChild(chatterEventWindow);
-            charSprite.bitmap.addLoadListener(function (_) {
-              LunaChatter.positionEventWindow(chatterEventWindow);
-            });
-            chatterEventWindow.close();
-          }
+            if (
+              charSprite.x == event.screenX() &&
+              charSprite.y == event.screenY()
+            ) {
+              chatterEventWindow.setEventSprite(charSprite);
+              charSprite.addChild(chatterEventWindow);
+              charSprite.bitmap.addLoadListener(function (_) {
+                LunaChatter.positionEventWindow(chatterEventWindow);
+              });
+              chatterEventWindow.close();
+            }
+          });
+          chatterEventWindow.setupEvents(LunaChatter.setupGameEvtEvents);
+          chatterEventWindow.open();
         });
-        chatterEventWindow.setupEvents(LunaChatter.setupGameEvtEvents);
-        chatterEventWindow.open();
-      });
+      }
     }
     static setupGameEvtEvents(currentWindow) {
       currentWindow.on("playerInRange", function (win) {

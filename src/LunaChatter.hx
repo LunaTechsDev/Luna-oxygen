@@ -38,7 +38,8 @@ class LunaChatter {
       backgroundType: Fn.parseIntJs(params['backgroundType']),
       eventBackgroundType: Fn.parseIntJs(params['eventBackgroundType']),
       templateStrings: JsonEx.parse(params['templateStrings']),
-      templateJSStrings: JsonEx.parse(params['templateJSStrings'])
+      templateJSStrings: JsonEx.parse(params['templateJSStrings']),
+      enableEventNames: params['enableEventNames'].trim() == 'true'
     }
 
     CHParams.templateJSStrings = cast CHParams.templateJSStrings.map((ts) -> JsonEx.parse(cast ts));
@@ -102,24 +103,26 @@ class LunaChatter {
     // Scan Events With Notetags to show event information
     var mapEvents = Globals.GameMap.events();
     // Add NoteTag Check Later -- + Add Events
-    mapEvents.iter((event) -> {
-      var chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
-      chatterEventWindow.setEvent(event);
+    if (CHParams.enableEventNames) {
+      mapEvents.iter((event) -> {
+        var chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
+        chatterEventWindow.setEvent(event);
 
-      scene.__spriteset.__characterSprites.iter((charSprite) -> {
-        if (charSprite.x == event.screenX() && charSprite.y == event.screenY()) {
-          chatterEventWindow.setEventSprite(charSprite);
-          charSprite.addChild(chatterEventWindow);
-          charSprite.bitmap.addLoadListener((_) -> {
-            positionEventWindow(chatterEventWindow);
-          });
-          chatterEventWindow.close();
-        }
+        scene.__spriteset.__characterSprites.iter((charSprite) -> {
+          if (charSprite.x == event.screenX() && charSprite.y == event.screenY()) {
+            chatterEventWindow.setEventSprite(charSprite);
+            charSprite.addChild(chatterEventWindow);
+            charSprite.bitmap.addLoadListener((_) -> {
+              positionEventWindow(chatterEventWindow);
+            });
+            chatterEventWindow.close();
+          }
+        });
+
+        chatterEventWindow.setupEvents(cast setupGameEvtEvents);
+        chatterEventWindow.open();
       });
-
-      chatterEventWindow.setupEvents(cast setupGameEvtEvents);
-      chatterEventWindow.open();
-    });
+    }
   }
 
   public static function setupGameEvtEvents(currentWindow: ChatterEventWindow) {

@@ -21,9 +21,8 @@
 
 @param enableEventNames
 @text Enable Event Names
-@desc Enables event names in the editor
+@desc Enables event names in the editor (true/false)
 @default true
-
 
 @param eventWindowRange
 @text Event Window Range

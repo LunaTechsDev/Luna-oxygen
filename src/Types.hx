@@ -24,6 +24,7 @@ typedef CHParams = {
   var eventBackgroundType: Int;
   var templateStrings: Array<TemplateString>;
   var templateJSStrings: Array<JSTemplate>;
+  var enableEventNames: Bool;
 };
 
 enum abstract ChatterType(String) from String to String {
