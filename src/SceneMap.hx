@@ -32,6 +32,15 @@ class SceneMap extends RmScene_Map {
       if (Main.chatterQueue.length == 0) {
         this._notificationTimer = Main.CHParams.notificationStayTime;
       }
+
+      if (Main.chatterQueue.length > 0) {
+        // Move all the windows down by amount when notification comes in
+        // Update will be necessary to use window height later
+        trace('Update chatter queue windows');
+        Main.chatterQueue.iter((chatWin) -> {
+          chatWin.moveBy(0, 90);
+        });
+      }
       Main.queueChatterWindow(win);
       switch (Main.CHParams.animationTypeNotification) {
         case SLIDE:

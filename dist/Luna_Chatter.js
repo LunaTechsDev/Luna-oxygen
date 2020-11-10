@@ -207,8 +207,14 @@ SOFTWARE
     }
     update() {
       super.update();
-      this.updateMove();
-      this.updateFade();
+      switch (LunaChatter.CHParams.animationTypeNotification) {
+        case "fade":
+          this.updateFade();
+          break;
+        case "slide":
+          this.updateMove();
+          break;
+      }
     }
     updateMove() {
       let xResult = this.x;
@@ -284,6 +290,7 @@ SOFTWARE
       this.eventSprite = evt;
     }
     updateMove() {}
+    updateFade() {}
     update() {
       super.update();
       this.scanForPlayer();
@@ -489,6 +496,17 @@ SOFTWARE
             _gthis._notificationTimer =
               LunaChatter.CHParams.notificationStayTime;
           }
+          if (LunaChatter.chatterQueue.length > 0) {
+            haxe_Log.trace("Update chatter queue windows", {
+              fileName: "src/SceneMap.hx",
+              lineNumber: 39,
+              className: "SceneMap",
+              methodName: "setupLCNotificationEvents",
+            });
+            Lambda.iter(LunaChatter.chatterQueue, function (chatWin) {
+              chatWin.moveBy(0, 90);
+            });
+          }
           LunaChatter.queueChatterWindow(win);
           switch (LunaChatter.CHParams.animationTypeNotification) {
             case "fade":
@@ -590,7 +608,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 120,
+            lineNumber: 129,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -774,6 +792,17 @@ SOFTWARE
         if (LunaChatter.chatterQueue.length == 0) {
           _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
         }
+        if (LunaChatter.chatterQueue.length > 0) {
+          haxe_Log.trace("Update chatter queue windows", {
+            fileName: "src/SceneMap.hx",
+            lineNumber: 39,
+            className: "SceneMap",
+            methodName: "setupLCNotificationEvents",
+          });
+          Lambda.iter(LunaChatter.chatterQueue, function (chatWin) {
+            chatWin.moveBy(0, 90);
+          });
+        }
         LunaChatter.queueChatterWindow(win);
         switch (LunaChatter.CHParams.animationTypeNotification) {
           case "fade":
@@ -866,7 +895,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 120,
+          lineNumber: 129,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],

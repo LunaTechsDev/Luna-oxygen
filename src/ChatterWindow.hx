@@ -54,8 +54,12 @@ class ChatterWindow extends Window_Base {
 
   public override function update() {
     super.update();
-    this.updateMove();
-    this.updateFade();
+    switch (Main.CHParams.animationTypeNotification) {
+      case FADE:
+        this.updateFade();
+      case SLIDE:
+        this.updateMove();
+    }
   }
 
   public function updateMove() {

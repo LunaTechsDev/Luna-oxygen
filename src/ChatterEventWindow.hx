@@ -32,6 +32,8 @@ class ChatterEventWindow extends ChatterWindow {
 
   public override function updateMove() {}
 
+  public override function updateFade() {}
+
   public override function update() {
     super.update();
     this.scanForPlayer();
