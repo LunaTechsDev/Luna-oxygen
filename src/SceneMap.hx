@@ -37,9 +37,7 @@ class SceneMap extends RmScene_Map {
         // Move all the windows down by amount when notification comes in
         // Update will be necessary to use window height later
         trace('Update chatter queue windows');
-        Main.chatterQueue.iter((chatWin) -> {
-          chatWin.moveBy(0, 90);
-        });
+        Main.chatterQueue.iter(handleSlideMove);
       }
       Main.queueChatterWindow(win);
       switch (Main.CHParams.animationTypeNotification) {
@@ -58,6 +56,22 @@ class SceneMap extends RmScene_Map {
           this.handleFadeOut(win);
       }
     });
+  }
+
+  public function handleSlideMove(win: ChatterWindow) {
+    switch (Main.CHParams.anchorPosition) {
+      case TOPLEFT:
+        win.moveBy(0, 90);
+
+      case TOPRIGHT:
+        win.moveBy(0, 90);
+
+      case BOTTOMLEFT:
+        win.moveBy(0, -90);
+
+      case BOTTOMRIGHT:
+        win.moveBy(0, -90);
+    }
   }
 
   public function handleSlideIn(win: ChatterWindow) {

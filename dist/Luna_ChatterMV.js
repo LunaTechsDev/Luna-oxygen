@@ -502,9 +502,10 @@ SOFTWARE
               className: "SceneMap",
               methodName: "setupLCNotificationEvents",
             });
-            Lambda.iter(LunaChatter.chatterQueue, function (chatWin) {
-              chatWin.moveBy(0, 90);
-            });
+            Lambda.iter(
+              LunaChatter.chatterQueue,
+              $bind(_gthis, _gthis.handleSlideMove)
+            );
           }
           LunaChatter.queueChatterWindow(win);
           switch (LunaChatter.CHParams.animationTypeNotification) {
@@ -527,6 +528,23 @@ SOFTWARE
               break;
           }
         });
+      };
+      let _Scene_Map_handleSlideMove = Scene_Map.prototype.handleSlideMove;
+      Scene_Map.prototype.handleSlideMove = function (win) {
+        switch (LunaChatter.CHParams.anchorPosition) {
+          case "bottomLeft":
+            win.moveBy(0, -90);
+            break;
+          case "bottomRight":
+            win.moveBy(0, -90);
+            break;
+          case "topLeft":
+            win.moveBy(0, 90);
+            break;
+          case "topRight":
+            win.moveBy(0, 90);
+            break;
+        }
       };
       let _Scene_Map_handleSlideIn = Scene_Map.prototype.handleSlideIn;
       Scene_Map.prototype.handleSlideIn = function (win) {
@@ -607,7 +625,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 129,
+            lineNumber: 143,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -798,9 +816,10 @@ SOFTWARE
             className: "SceneMap",
             methodName: "setupLCNotificationEvents",
           });
-          Lambda.iter(LunaChatter.chatterQueue, function (chatWin) {
-            chatWin.moveBy(0, 90);
-          });
+          Lambda.iter(
+            LunaChatter.chatterQueue,
+            $bind(_gthis, _gthis.handleSlideMove)
+          );
         }
         LunaChatter.queueChatterWindow(win);
         switch (LunaChatter.CHParams.animationTypeNotification) {
@@ -823,6 +842,22 @@ SOFTWARE
             break;
         }
       });
+    }
+    handleSlideMove(win) {
+      switch (LunaChatter.CHParams.anchorPosition) {
+        case "bottomLeft":
+          win.moveBy(0, -90);
+          break;
+        case "bottomRight":
+          win.moveBy(0, -90);
+          break;
+        case "topLeft":
+          win.moveBy(0, 90);
+          break;
+        case "topRight":
+          win.moveBy(0, 90);
+          break;
+      }
     }
     handleSlideIn(win) {
       switch (LunaChatter.CHParams.anchorPosition) {
@@ -894,7 +929,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 129,
+          lineNumber: 143,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],
