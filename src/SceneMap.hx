@@ -29,7 +29,9 @@ class SceneMap extends RmScene_Map {
 
     listener.on(ChatterEvents.QUEUE, (win: ChatterWindow) -> {
       // Reset Timer
-      this._notificationTimer = Main.CHParams.notificationStayTime;
+      if (Main.chatterQueue.length == 0) {
+        this._notificationTimer = Main.CHParams.notificationStayTime;
+      }
       Main.queueChatterWindow(win);
       this.handleSlideIn(win);
     });
@@ -178,6 +180,10 @@ class SceneMap extends RmScene_Map {
     }
     if (Main.chatterQueue.length > 0 && this._notificationTimer == 0) {
       Main.ChatterEmitter.emit(ChatterEvents.DEQUEUE);
+      // Reset Timer If Notifications Remain
+      if (Main.chatterQueue.length > 0) {
+        this._notificationTimer = Main.CHParams.notificationStayTime;
+      }
     }
   }
 

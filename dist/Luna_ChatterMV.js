@@ -461,7 +461,10 @@ SOFTWARE
           win.drawText(text, 0, 0, win.contentsWidth(), "left");
         });
         listener.on("queue", function (win) {
-          _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+          if (LunaChatter.chatterQueue.length == 0) {
+            _gthis._notificationTimer =
+              LunaChatter.CHParams.notificationStayTime;
+          }
           LunaChatter.queueChatterWindow(win);
           _gthis.handleSlideIn(win);
         });
@@ -545,7 +548,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 104,
+            lineNumber: 106,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -637,6 +640,9 @@ SOFTWARE
           this._notificationTimer == 0
         ) {
           LunaChatter.ChatterEmitter.emit("dequeue");
+          if (LunaChatter.chatterQueue.length > 0) {
+            this._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+          }
         }
       };
       let _Scene_Map_showChatterWindow = Scene_Map.prototype.showChatterWindow;
@@ -723,7 +729,9 @@ SOFTWARE
         win.drawText(text, 0, 0, win.contentsWidth(), "left");
       });
       listener.on("queue", function (win) {
-        _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+        if (LunaChatter.chatterQueue.length == 0) {
+          _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+        }
         LunaChatter.queueChatterWindow(win);
         _gthis.handleSlideIn(win);
       });
@@ -796,7 +804,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 104,
+          lineNumber: 106,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],
@@ -874,6 +882,9 @@ SOFTWARE
       }
       if (LunaChatter.chatterQueue.length > 0 && this._notificationTimer == 0) {
         LunaChatter.ChatterEmitter.emit("dequeue");
+        if (LunaChatter.chatterQueue.length > 0) {
+          this._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+        }
       }
     }
     openChatterWindow(win) {
