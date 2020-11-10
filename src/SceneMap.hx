@@ -6,17 +6,74 @@ import rm.scenes.Scene_Map as RmScene_Map;
 using Lambda;
 
 class SceneMap extends RmScene_Map {
+  public var _notificationTimer: Int; // 5 seconds
+
+  public function new() {
+    super();
+  }
+
+  public override function initialize() {
+    untyped _Scene_Map_initialize.call(this);
+    this._notificationTimer = Main.CHParams.notificationStayTime;
+  }
+
   public function setupLCNotificationEvents() {
     var listener = Main.ChatterEmitter;
 
-    listener.on(ChatterEvents.PUSHNOTIF, (text) -> {
+    listener.on(ChatterEvents.PUSHNOTIF, (text: String) -> {
       // Start Queue and Transition Window
       var win = Main.chatterWindows.pop();
-      win.drawText(text, 0, 0, win.contentsWidth(), 'left');
-      win.move(0, 0);
       listener.emit(ChatterEvents.QUEUE, win);
+      win.drawText(text, 0, 0, win.contentsWidth(), 'left');
+    });
+
+    listener.on(ChatterEvents.QUEUE, (win: ChatterWindow) -> {
+      // Reset Timer
+      this._notificationTimer = Main.CHParams.notificationStayTime;
+      Main.queueChatterWindow(win);
+      this.handleSlideIn(win);
+    });
+    listener.on(ChatterEvents.DEQUEUE, () -> {
+      var win = Main.dequeueChatterWindow();
+      this.handleSlideOut(win);
     });
   }
+
+  public function handleSlideIn(win: ChatterWindow) {
+    switch (Main.CHParams.anchorPosition) {
+      case TOPLEFT:
+        win.moveBy(win.width, 0);
+
+      case TOPRIGHT:
+        win.moveBy(-win.width, 0);
+
+      case BOTTOMLEFT:
+        win.moveBy(win.width, 0);
+
+      case BOTTOMRIGHT:
+        win.moveBy(-win.width, 0);
+    }
+  }
+
+  public function handleSlideOut(win: ChatterWindow) {
+    switch (Main.CHParams.anchorPosition) {
+      case TOPLEFT:
+        win.moveBy(-win.width, 0);
+
+      case TOPRIGHT:
+        win.moveBy(win.width, 0);
+
+      case BOTTOMLEFT:
+        win.moveBy(-win.width, 0);
+
+      case BOTTOMRIGHT:
+        win.moveBy(win.width, 0);
+    }
+  }
+
+  public function handleFadeIn(win: ChatterWindow) {}
+
+  public function handleFadeOut(win: ChatterWindow) {}
 
   public override function createAllWindows() {
     untyped _Scene_Map_createAllWindows.call(this);
@@ -28,18 +85,20 @@ class SceneMap extends RmScene_Map {
   public function createAllLCWindows() {
     // Create notification windows based on maximum
     // keep them hidden until ready to use
+    var width = 200;
+    var height = 75;
     for (x in 0...Main.CHParams.maxChatterWindows) {
       var pos = switch (Main.CHParams.anchorPosition) {
         case BOTTOMLEFT:
-          { x: 0, y: Graphics.boxHeight };
+          { x: -width, y: Graphics.boxHeight };
         case BOTTOMRIGHT:
           { x: Graphics.boxWidth, y: Graphics.boxHeight };
         case TOPLEFT:
-          { x: 0, y: 0 }
+          { x: -width, y: 0 }
         case TOPRIGHT:
           { x: Graphics.boxWidth, y: 0 };
       }
-      var chatterWindow = new ChatterWindow(cast pos.x, cast pos.y, 200, 75);
+      var chatterWindow = new ChatterWindow(cast pos.x, cast pos.y, width, height);
       Main.chatterWindows.push(chatterWindow);
       this.addWindow(chatterWindow);
       trace('Created ', x + 1, ' windows');
@@ -104,6 +163,22 @@ class SceneMap extends RmScene_Map {
     currentWindow.on(ChatterEvents.PAINT, (win: ChatterEventWindow) -> {
       win.drawText(win.event.event().name, 0, 0, win.contentsWidth(), 'center');
     });
+  }
+
+  // ======================
+  // Update Changes
+  public override function update() {
+    untyped _Scene_Map_update.call(this);
+    this.updateChatterNotifications();
+  }
+
+  public function updateChatterNotifications() {
+    if (this._notificationTimer > 0) {
+      this._notificationTimer--;
+    }
+    if (Main.chatterQueue.length > 0 && this._notificationTimer == 0) {
+      Main.ChatterEmitter.emit(ChatterEvents.DEQUEUE);
+    }
   }
 
   // ======================

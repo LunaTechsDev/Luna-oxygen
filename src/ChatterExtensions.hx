@@ -1,3 +1,4 @@
+import core.Amaryllis;
 import rm.types.RM.TextState;
 import rm.windows.Window_Base;
 import Types.JSTemplate;
@@ -6,6 +7,15 @@ import rm.sprites.Sprite_Character;
 import rm.objects.Game_Event;
 
 using Lambda;
+
+interface OpacityObject {
+  var opacity: Float;
+}
+
+interface PosObject {
+  var x: Float;
+  var y: Float;
+}
 
 class ChatterExtensions {
   public static function enqueue<T>(arr: Array<T>, element: T) {
@@ -47,5 +57,16 @@ class ChatterExtensions {
     #else
     win.drawTextEx(text, textState.x, textState.y, win.contentsWidth());
     #end
+  }
+
+  public static inline function updateFade(shadowOpacity: Float, displayObj: OpacityObject) {
+    var opacityResult = displayObj.opacity;
+    if (shadowOpacity != displayObj.opacity) {
+      opacityResult = Amaryllis.lerp(displayObj.opacity, shadowOpacity, 0.045);
+    }
+    if (Math.abs(shadowOpacity - displayObj.opacity) < 0.5) {
+      opacityResult = Math.round(opacityResult);
+    }
+    displayObj.opacity = opacityResult;
   }
 }

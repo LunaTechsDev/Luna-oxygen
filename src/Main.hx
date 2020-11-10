@@ -35,30 +35,21 @@ class Main {
       templateStrings: JsonEx.parse(params['templateStrings']),
       templateJSStrings: JsonEx.parse(params['templateJSStrings']),
       enableEventNames: params['enableEventNames'].trim() == 'true',
-      maxChatterWindows: Fn.parseIntJs(params['maxChatterWindows'])
+      maxChatterWindows: Fn.parseIntJs(params['maxChatterWindows']),
+      marginPadding: Fn.parseIntJs(params['marginPadding']),
+      animationTypeNotification: params['animationTypeNotification'].trim(),
+      notificationStayTime: Fn.parseIntJs(params['notificationStayTime'])
     }
 
     CHParams.templateJSStrings = cast CHParams.templateJSStrings.map((ts) -> JsonEx.parse(cast ts));
     CHParams.templateStrings = cast CHParams.templateStrings.map((ts) -> JsonEx.parse(cast ts));
     trace(CHParams);
 
-    Comment.title('Event Hooks');
-    setupEvents();
-
     Comment.title('Scene_Map');
     FnMacros.jsPatch(true, RmScene_Map, SceneMap);
 
     Comment.title('Window_Base');
     FnMacros.jsPatch(true, RmWindow_Base, WindowBase);
-  }
-
-  public static function setupEvents() {
-    ChatterEmitter.on(ChatterEvents.QUEUE, (win: ChatterWindow) -> {
-      queueChatterWindow(win);
-    });
-    ChatterEmitter.on(ChatterEvents.DEQUEUE, () -> {
-      dequeueChatterWindow();
-    });
   }
 
   // ============================

@@ -8,6 +8,22 @@
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
 
+@param notificationStayTime
+@text Notification Stay Time
+@desc The amount of time in frames, that the notification should stay on screen.
+@default 300
+
+
+@param animationTypeNotification
+@text Animation Type (Notification)
+@desc Animation type for the chatter notification windows (slide/fade)
+@default slide 
+
+@param marginPadding
+@text Margin Padding
+@desc The amount of padding from the edge of the game screen when the notification window is on screen.
+@default 12
+
 @param maxChatterWindows
 @text Maximum Chatter Windows
 @desc The maximum number of chatter windows available on screen
@@ -62,7 +78,9 @@ the chatter window.
 
 
 @help
-This plugin allows you to have a press start button before the title screen information.
+
+This plugin adds names to events as well as notification windows on the side
+of the screen inside of your game.
 
 MIT License
 Copyright (c) 2020 LunaTechsDev

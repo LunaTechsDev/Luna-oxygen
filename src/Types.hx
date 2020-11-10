@@ -26,7 +26,20 @@ typedef CHParams = {
   var templateJSStrings: Array<JSTemplate>;
   var enableEventNames: Bool;
   var maxChatterWindows: Int;
+  var marginPadding: Int;
+  var animationTypeNotification: NotifAnimType;
+  var notificationStayTime: Int;
 };
+
+enum abstract NotifAnimType(String) from String to String {
+  public var SLIDE = 'slide';
+  public var FADE = 'fade';
+}
+
+enum abstract EventAnimType(String) from String to String {
+  public var FADE = 'fade';
+  public var POP = 'pop';
+}
 
 enum abstract ChatterType(String) from String to String {
   public var TEXT = 'text';

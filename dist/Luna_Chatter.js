@@ -2,7 +2,7 @@
  *
  *  Luna_Chatter.js
  * 
- *  Build Date: 11/8/2020
+ *  Build Date: 11/9/2020
  * 
  *  Made with LunaTea -- Haxe
  *
@@ -18,6 +18,22 @@
 @param audioBytes
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
+
+@param notificationStayTime
+@text Notification Stay Time
+@desc The amount of time in frames, that the notification should stay on screen.
+@default 300
+
+
+@param animationTypeNotification
+@text Animation Type (Notification)
+@desc Animation type for the chatter notification windows (slide/fade)
+@default slide 
+
+@param marginPadding
+@text Margin Padding
+@desc The amount of padding from the edge of the game screen when the notification window is on screen.
+@default 12
 
 @param maxChatterWindows
 @text Maximum Chatter Windows
@@ -73,7 +89,9 @@ the chatter window.
 
 
 @help
-This plugin allows you to have a press start button before the title screen information.
+
+This plugin adds names to events as well as notification windows on the side
+of the screen inside of your game.
 
 MIT License
 Copyright (c) 2020 LunaTechsDev
@@ -162,12 +180,45 @@ SOFTWARE
     constructor(x, y, width, height) {
       super(new Rectangle(x, y, width, height));
       this.setBGType();
+      this._shadowX = this.x;
+      this._shadowY = this.y;
     }
     setBGType() {
       this.setBackgroundType(LunaChatter.CHParams.backgroundType);
     }
     setupEvents(fn) {
       fn(this);
+    }
+    moveTo(x, y) {
+      this._shadowX = x;
+      this._shadowY = y;
+    }
+    moveBy(x, y) {
+      this._shadowX += x;
+      if (y != null) {
+        this._shadowY += y;
+      }
+    }
+    update() {
+      super.update();
+      this.updateMove();
+    }
+    updateMove() {
+      let xResult = this.x;
+      let yResult = this.y;
+      if (this._shadowX != this.x) {
+        xResult = core_Amaryllis.lerp(this.x, this._shadowX, 0.025);
+      }
+      if (this._shadowY != this.y) {
+        yResult = core_Amaryllis.lerp(this.y, this._shadowY, 0.025);
+      }
+      if (Math.abs(this._shadowX - this.x) < 0.5) {
+        xResult = Math.round(xResult);
+      }
+      if (Math.abs(this._shadowY - this.y) < 0.5) {
+        yResult = Math.round(yResult);
+      }
+      this.move(xResult, yResult, this.width, this.height);
     }
     paint() {
       if (this.contents != null) {
@@ -209,6 +260,7 @@ SOFTWARE
     setEventSprite(evt) {
       this.eventSprite = evt;
     }
+    updateMove() {}
     update() {
       super.update();
       this.scanForPlayer();
@@ -280,7 +332,7 @@ SOFTWARE
       let text = new Function(templateJsStr.code)();
       haxe_Log.trace(templateJsStr, {
         fileName: "src/ChatterExtensions.hx",
-        lineNumber: 44,
+        lineNumber: 54,
         className: "ChatterExtensions",
         methodName: "processJSTemplateString",
       });
@@ -343,6 +395,11 @@ SOFTWARE
       let tmp7 = JsonEx.parse(LunaChatter.params["templateJSStrings"]);
       let tmp8 = LunaChatter.params["enableEventNames"].trim() == "true";
       let string5 = LunaChatter.params["maxChatterWindows"];
+      let tmp9 = parseInt(string5, 10);
+      let string6 = LunaChatter.params["marginPadding"];
+      let tmp10 = parseInt(string6, 10);
+      let tmp11 = LunaChatter.params["animationTypeNotification"].trim();
+      let string7 = LunaChatter.params["notificationStayTime"];
       LunaChatter.CHParams = {
         fadeInTime: tmp,
         fadeOutTime: tmp1,
@@ -353,7 +410,10 @@ SOFTWARE
         templateStrings: tmp6,
         templateJSStrings: tmp7,
         enableEventNames: tmp8,
-        maxChatterWindows: parseInt(string5, 10),
+        maxChatterWindows: tmp9,
+        marginPadding: tmp10,
+        animationTypeNotification: tmp11,
+        notificationStayTime: parseInt(string7, 10),
       };
       let _this = LunaChatter.CHParams.templateJSStrings;
       let result = new Array(_this.length);
@@ -367,38 +427,88 @@ SOFTWARE
       let _this1 = LunaChatter.CHParams.templateStrings;
       let result1 = new Array(_this1.length);
       let _g2 = 0;
-      let _g3 = _this1.length;
-      while (_g2 < _g3) {
+      let _g11 = _this1.length;
+      while (_g2 < _g11) {
         let i = _g2++;
         result1[i] = JsonEx.parse(_this1[i]);
       }
       LunaChatter.CHParams.templateStrings = result1;
       haxe_Log.trace(LunaChatter.CHParams, {
         fileName: "src/Main.hx",
-        lineNumber: 43,
+        lineNumber: 46,
         className: "Main",
         methodName: "main",
       });
 
       //=============================================================================
-      // Event Hooks
-      //=============================================================================
-      LunaChatter.setupEvents();
-
-      //=============================================================================
       // Scene_Map
       //=============================================================================
+      let _Scene_Map__notificationTimer =
+        Scene_Map.prototype._notificationTimer;
+      Scene_Map.prototype._notificationTimer = null;
+      let _Scene_Map_initialize = Scene_Map.prototype.initialize;
+      Scene_Map.prototype.initialize = function () {
+        _Scene_Map_initialize.call(this);
+        this._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+      };
       let _Scene_Map_setupLCNotificationEvents =
         Scene_Map.prototype.setupLCNotificationEvents;
       Scene_Map.prototype.setupLCNotificationEvents = function () {
         let listener = LunaChatter.ChatterEmitter;
+        let _gthis = this;
         listener.on("pushNotification", function (text) {
           let win = LunaChatter.chatterWindows.pop();
-          win.drawText(text, 0, 0, win.contentsWidth(), "left");
-          win.move(0, 0);
           listener.emit("queue", win);
+          win.drawText(text, 0, 0, win.contentsWidth(), "left");
+        });
+        listener.on("queue", function (win) {
+          _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+          LunaChatter.queueChatterWindow(win);
+          _gthis.handleSlideIn(win);
+        });
+        listener.on("dequeue", function () {
+          let win = LunaChatter.dequeueChatterWindow();
+          _gthis.handleSlideOut(win);
         });
       };
+      let _Scene_Map_handleSlideIn = Scene_Map.prototype.handleSlideIn;
+      Scene_Map.prototype.handleSlideIn = function (win) {
+        switch (LunaChatter.CHParams.anchorPosition) {
+          case "bottomLeft":
+            win.moveBy(win.width, 0);
+            break;
+          case "bottomRight":
+            win.moveBy(-win.width, 0);
+            break;
+          case "topLeft":
+            win.moveBy(win.width, 0);
+            break;
+          case "topRight":
+            win.moveBy(-win.width, 0);
+            break;
+        }
+      };
+      let _Scene_Map_handleSlideOut = Scene_Map.prototype.handleSlideOut;
+      Scene_Map.prototype.handleSlideOut = function (win) {
+        switch (LunaChatter.CHParams.anchorPosition) {
+          case "bottomLeft":
+            win.moveBy(-win.width, 0);
+            break;
+          case "bottomRight":
+            win.moveBy(win.width, 0);
+            break;
+          case "topLeft":
+            win.moveBy(-win.width, 0);
+            break;
+          case "topRight":
+            win.moveBy(win.width, 0);
+            break;
+        }
+      };
+      let _Scene_Map_handleFadeIn = Scene_Map.prototype.handleFadeIn;
+      Scene_Map.prototype.handleFadeIn = function (win) {};
+      let _Scene_Map_handleFadeOut = Scene_Map.prototype.handleFadeOut;
+      Scene_Map.prototype.handleFadeOut = function (win) {};
       let _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
       Scene_Map.prototype.createAllWindows = function () {
         _Scene_Map_createAllWindows.call(this);
@@ -409,6 +519,8 @@ SOFTWARE
       let _Scene_Map_createAllLCWindows =
         Scene_Map.prototype.createAllLCWindows;
       Scene_Map.prototype.createAllLCWindows = function () {
+        let width = 200;
+        let height = 75;
         let _g = 0;
         let _g1 = LunaChatter.CHParams.maxChatterWindows;
         while (_g < _g1) {
@@ -416,25 +528,25 @@ SOFTWARE
           let pos;
           switch (LunaChatter.CHParams.anchorPosition) {
             case "bottomLeft":
-              pos = { x: 0, y: Graphics.boxHeight };
+              pos = { x: -width, y: Graphics.boxHeight };
               break;
             case "bottomRight":
               pos = { x: Graphics.boxWidth, y: Graphics.boxHeight };
               break;
             case "topLeft":
-              pos = { x: 0, y: 0 };
+              pos = { x: -width, y: 0 };
               break;
             case "topRight":
               pos = { x: Graphics.boxWidth, y: 0 };
               break;
           }
 
-          let chatterWindow = new ChatterWindow(pos.x, pos.y, 200, 75);
+          let chatterWindow = new ChatterWindow(pos.x, pos.y, width, height);
           LunaChatter.chatterWindows.push(chatterWindow);
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 45,
+            lineNumber: 104,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -510,6 +622,24 @@ SOFTWARE
           );
         });
       };
+      let _Scene_Map_update = Scene_Map.prototype.update;
+      Scene_Map.prototype.update = function () {
+        _Scene_Map_update.call(this);
+        this.updateChatterNotifications();
+      };
+      let _Scene_Map_updateChatterNotifications =
+        Scene_Map.prototype.updateChatterNotifications;
+      Scene_Map.prototype.updateChatterNotifications = function () {
+        if (this._notificationTimer > 0) {
+          this._notificationTimer--;
+        }
+        if (
+          LunaChatter.chatterQueue.length > 0 &&
+          this._notificationTimer == 0
+        ) {
+          LunaChatter.ChatterEmitter.emit("dequeue");
+        }
+      };
       let _Scene_Map_showChatterWindow = Scene_Map.prototype.showChatterWindow;
       Scene_Map.prototype.showChatterWindow = function (win) {
         win.show();
@@ -557,14 +687,6 @@ SOFTWARE
         }
       };
     }
-    static setupEvents() {
-      LunaChatter.ChatterEmitter.on("queue", function (win) {
-        LunaChatter.queueChatterWindow(win);
-      });
-      LunaChatter.ChatterEmitter.on("dequeue", function () {
-        LunaChatter.dequeueChatterWindow();
-      });
-    }
     static showChatterEventWindow() {}
     static positionEventWindow(win) {
       let offset = ChatterExtensions.offsetByEventSprite(win.eventSprite);
@@ -589,14 +711,59 @@ SOFTWARE
     constructor() {
       super();
     }
+    initialize() {
+      _Scene_Map_initialize.call(this);
+      this._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+    }
     setupLCNotificationEvents() {
       let listener = LunaChatter.ChatterEmitter;
+      let _gthis = this;
       listener.on("pushNotification", function (text) {
         let win = LunaChatter.chatterWindows.pop();
-        win.drawText(text, 0, 0, win.contentsWidth(), "left");
-        win.move(0, 0);
         listener.emit("queue", win);
+        win.drawText(text, 0, 0, win.contentsWidth(), "left");
       });
+      listener.on("queue", function (win) {
+        _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
+        LunaChatter.queueChatterWindow(win);
+        _gthis.handleSlideIn(win);
+      });
+      listener.on("dequeue", function () {
+        let win = LunaChatter.dequeueChatterWindow();
+        _gthis.handleSlideOut(win);
+      });
+    }
+    handleSlideIn(win) {
+      switch (LunaChatter.CHParams.anchorPosition) {
+        case "bottomLeft":
+          win.moveBy(win.width, 0);
+          break;
+        case "bottomRight":
+          win.moveBy(-win.width, 0);
+          break;
+        case "topLeft":
+          win.moveBy(win.width, 0);
+          break;
+        case "topRight":
+          win.moveBy(-win.width, 0);
+          break;
+      }
+    }
+    handleSlideOut(win) {
+      switch (LunaChatter.CHParams.anchorPosition) {
+        case "bottomLeft":
+          win.moveBy(-win.width, 0);
+          break;
+        case "bottomRight":
+          win.moveBy(win.width, 0);
+          break;
+        case "topLeft":
+          win.moveBy(-win.width, 0);
+          break;
+        case "topRight":
+          win.moveBy(win.width, 0);
+          break;
+      }
     }
     createAllWindows() {
       _Scene_Map_createAllWindows.call(this);
@@ -612,13 +779,13 @@ SOFTWARE
         let pos;
         switch (LunaChatter.CHParams.anchorPosition) {
           case "bottomLeft":
-            pos = { x: 0, y: Graphics.boxHeight };
+            pos = { x: -200, y: Graphics.boxHeight };
             break;
           case "bottomRight":
             pos = { x: Graphics.boxWidth, y: Graphics.boxHeight };
             break;
           case "topLeft":
-            pos = { x: 0, y: 0 };
+            pos = { x: -200, y: 0 };
             break;
           case "topRight":
             pos = { x: Graphics.boxWidth, y: 0 };
@@ -630,7 +797,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 45,
+          lineNumber: 104,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],
@@ -702,6 +869,14 @@ SOFTWARE
         );
       });
     }
+    updateChatterNotifications() {
+      if (this._notificationTimer > 0) {
+        this._notificationTimer--;
+      }
+      if (LunaChatter.chatterQueue.length > 0 && this._notificationTimer == 0) {
+        LunaChatter.ChatterEmitter.emit("dequeue");
+      }
+    }
     openChatterWindow(win) {
       win.open();
     }
@@ -745,6 +920,13 @@ SOFTWARE
   }
 
   WindowBase.__name__ = true;
+  class core_Amaryllis {
+    static lerp(start, end, amount) {
+      return start + (end - start) * amount;
+    }
+  }
+
+  core_Amaryllis.__name__ = true;
   class haxe_Log {
     static formatOutput(v, infos) {
       let str = Std.string(v);
