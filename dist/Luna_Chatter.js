@@ -199,9 +199,16 @@ SOFTWARE
         this._shadowY += y;
       }
     }
+    fadeTo(opacity) {
+      this._shadowOpacity = opacity;
+    }
+    fadeBy(opacity) {
+      this._shadowOpacity += opacity;
+    }
     update() {
       super.update();
       this.updateMove();
+      this.updateFade();
     }
     updateMove() {
       let xResult = this.x;
@@ -219,6 +226,22 @@ SOFTWARE
         yResult = Math.round(yResult);
       }
       this.move(xResult, yResult, this.width, this.height);
+    }
+    updateFade() {
+      let shadowOpacity = this._shadowOpacity;
+      let displayObj = this;
+      let opacityResult = displayObj.opacity;
+      if (shadowOpacity != displayObj.opacity) {
+        opacityResult = core_Amaryllis.lerp(
+          displayObj.opacity,
+          shadowOpacity,
+          0.045
+        );
+      }
+      if (Math.abs(shadowOpacity - displayObj.opacity) < 0.5) {
+        opacityResult = Math.round(opacityResult);
+      }
+      displayObj.opacity = opacityResult;
     }
     paint() {
       if (this.contents != null) {
@@ -467,11 +490,25 @@ SOFTWARE
               LunaChatter.CHParams.notificationStayTime;
           }
           LunaChatter.queueChatterWindow(win);
-          _gthis.handleSlideIn(win);
+          switch (LunaChatter.CHParams.animationTypeNotification) {
+            case "fade":
+              _gthis.handleFadeIn(win);
+              break;
+            case "slide":
+              _gthis.handleSlideIn(win);
+              break;
+          }
         });
         listener.on("dequeue", function () {
           let win = LunaChatter.dequeueChatterWindow();
-          _gthis.handleSlideOut(win);
+          switch (LunaChatter.CHParams.animationTypeNotification) {
+            case "fade":
+              _gthis.handleFadeOut(win);
+              break;
+            case "slide":
+              _gthis.handleSlideOut(win);
+              break;
+          }
         });
       };
       let _Scene_Map_handleSlideIn = Scene_Map.prototype.handleSlideIn;
@@ -509,9 +546,13 @@ SOFTWARE
         }
       };
       let _Scene_Map_handleFadeIn = Scene_Map.prototype.handleFadeIn;
-      Scene_Map.prototype.handleFadeIn = function (win) {};
+      Scene_Map.prototype.handleFadeIn = function (win) {
+        win.fadeTo(255);
+      };
       let _Scene_Map_handleFadeOut = Scene_Map.prototype.handleFadeOut;
-      Scene_Map.prototype.handleFadeOut = function (win) {};
+      Scene_Map.prototype.handleFadeOut = function (win) {
+        win.fadeTo(0);
+      };
       let _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
       Scene_Map.prototype.createAllWindows = function () {
         _Scene_Map_createAllWindows.call(this);
@@ -549,7 +590,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 106,
+            lineNumber: 120,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -734,11 +775,25 @@ SOFTWARE
           _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
         }
         LunaChatter.queueChatterWindow(win);
-        _gthis.handleSlideIn(win);
+        switch (LunaChatter.CHParams.animationTypeNotification) {
+          case "fade":
+            _gthis.handleFadeIn(win);
+            break;
+          case "slide":
+            _gthis.handleSlideIn(win);
+            break;
+        }
       });
       listener.on("dequeue", function () {
         let win = LunaChatter.dequeueChatterWindow();
-        _gthis.handleSlideOut(win);
+        switch (LunaChatter.CHParams.animationTypeNotification) {
+          case "fade":
+            _gthis.handleFadeOut(win);
+            break;
+          case "slide":
+            _gthis.handleSlideOut(win);
+            break;
+        }
       });
     }
     handleSlideIn(win) {
@@ -773,6 +828,12 @@ SOFTWARE
           break;
       }
     }
+    handleFadeIn(win) {
+      win.fadeTo(255);
+    }
+    handleFadeOut(win) {
+      win.fadeTo(0);
+    }
     createAllWindows() {
       _Scene_Map_createAllWindows.call(this);
       this.createAllLCWindows();
@@ -805,7 +866,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 106,
+          lineNumber: 120,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],

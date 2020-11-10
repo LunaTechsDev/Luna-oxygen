@@ -33,11 +33,21 @@ class SceneMap extends RmScene_Map {
         this._notificationTimer = Main.CHParams.notificationStayTime;
       }
       Main.queueChatterWindow(win);
-      this.handleSlideIn(win);
+      switch (Main.CHParams.animationTypeNotification) {
+        case SLIDE:
+          this.handleSlideIn(win);
+        case FADE:
+          this.handleFadeIn(win);
+      }
     });
     listener.on(ChatterEvents.DEQUEUE, () -> {
       var win = Main.dequeueChatterWindow();
-      this.handleSlideOut(win);
+      switch (Main.CHParams.animationTypeNotification) {
+        case SLIDE:
+          this.handleSlideOut(win);
+        case FADE:
+          this.handleFadeOut(win);
+      }
     });
   }
 
@@ -73,9 +83,13 @@ class SceneMap extends RmScene_Map {
     }
   }
 
-  public function handleFadeIn(win: ChatterWindow) {}
+  public function handleFadeIn(win: ChatterWindow) {
+    win.fadeTo(255);
+  }
 
-  public function handleFadeOut(win: ChatterWindow) {}
+  public function handleFadeOut(win: ChatterWindow) {
+    win.fadeTo(0);
+  }
 
   public override function createAllWindows() {
     untyped _Scene_Map_createAllWindows.call(this);

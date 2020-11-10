@@ -3,11 +3,14 @@ import rm.core.Rectangle;
 import Types.ChatterEvents;
 import rm.windows.Window_Base;
 
+using ChatterExtensions;
+
 @:keep
 @:native('ChatterWindow')
 class ChatterWindow extends Window_Base {
   public var _shadowX: Float;
   public var _shadowY: Float;
+  public var _shadowOpacity: Float;
 
   public function new(x: Int, y: Int, width: Int, height: Int) {
     #if compileMV
@@ -41,9 +44,18 @@ class ChatterWindow extends Window_Base {
     }
   }
 
+  public function fadeTo(opacity: Float) {
+    this._shadowOpacity = opacity;
+  }
+
+  public function fadeBy(opacity: Float) {
+    this._shadowOpacity += opacity;
+  }
+
   public override function update() {
     super.update();
     this.updateMove();
+    this.updateFade();
   }
 
   public function updateMove() {
@@ -72,6 +84,10 @@ class ChatterWindow extends Window_Base {
     }
 
     this.move(xResult, yResult, this.width, this.height);
+  }
+
+  public function updateFade() {
+    ChatterExtensions.updateFade(this._shadowOpacity, cast this);
   }
 
   public function paint() {
