@@ -42,7 +42,28 @@ class SceneMap extends RmScene_Map {
       #end
     });
 
-    listener.on(ChatterEvents.PUSHCHARNOTIF, (text: String, charImg: String, index: Int) -> {});
+    listener.on(ChatterEvents.PUSHCHARNOTIF, (text: String, charImg: String, index: Int) -> {
+      // Show Character face, then text
+      var win = Main.chatterWindows.pop();
+      win.drawCharacter(charImg, index, 0, 0);
+      var charWidth = 48;
+      #if compileMV
+      win.drawTextEx(text, charWidth, 0);
+      #else
+      win.drawTextEx(text, charWidth, 0, win.contentsWidth());
+      #end
+    });
+
+    listener.on(ChatterEvents.PUSHFACENOTIF, (text: String, faceName: String, faceIndex: Int) -> {
+      var win = Main.chatterWindows.pop();
+      var faceWidth = 50;
+      win.drawFace(faceName, faceIndex, 0, 0, 50, win.contentsHeight());
+      #if compileMV
+      win.drawTextEx(text, faceWidth, 0);
+      #else
+      win.drawTextEx(text, faceWidth, 0, win.contentsWidth());
+      #end
+    });
 
     listener.on(ChatterEvents.QUEUE, (win: ChatterWindow) -> {
       // Reset Timer

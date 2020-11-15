@@ -547,7 +547,20 @@ SOFTWARE
           charImg,
           index
         ) {
-          return;
+          let win = LunaChatter.chatterWindows.pop();
+          win.drawCharacter(charImg, index, 0, 0);
+          let charWidth = 48;
+          return win.drawTextEx(text, charWidth, 0, win.contentsWidth());
+        });
+        listener.on("pushFaceNotification", function (
+          text,
+          faceName,
+          faceIndex
+        ) {
+          let win = LunaChatter.chatterWindows.pop();
+          let faceWidth = 50;
+          win.drawFace(faceName, faceIndex, 0, 0, 50, win.contentsHeight());
+          return win.drawTextEx(text, faceWidth, 0, win.contentsWidth());
         });
         listener.on("queue", function (win) {
           if (LunaChatter.chatterQueue.length == 0) {
@@ -557,7 +570,7 @@ SOFTWARE
           if (LunaChatter.chatterQueue.length > 0) {
             haxe_Log.trace("Update chatter queue windows", {
               fileName: "src/SceneMap.hx",
-              lineNumber: 56,
+              lineNumber: 77,
               className: "SceneMap",
               methodName: "setupLCNotificationEvents",
             });
@@ -684,7 +697,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 160,
+            lineNumber: 181,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -916,7 +929,14 @@ SOFTWARE
         );
       });
       listener.on("pushCharacterNotification", function (text, charImg, index) {
-        return;
+        let win = LunaChatter.chatterWindows.pop();
+        win.drawCharacter(charImg, index, 0, 0);
+        return win.drawTextEx(text, 48, 0, win.contentsWidth());
+      });
+      listener.on("pushFaceNotification", function (text, faceName, faceIndex) {
+        let win = LunaChatter.chatterWindows.pop();
+        win.drawFace(faceName, faceIndex, 0, 0, 50, win.contentsHeight());
+        return win.drawTextEx(text, 50, 0, win.contentsWidth());
       });
       listener.on("queue", function (win) {
         if (LunaChatter.chatterQueue.length == 0) {
@@ -925,7 +945,7 @@ SOFTWARE
         if (LunaChatter.chatterQueue.length > 0) {
           haxe_Log.trace("Update chatter queue windows", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 56,
+            lineNumber: 77,
             className: "SceneMap",
             methodName: "setupLCNotificationEvents",
           });
@@ -1042,7 +1062,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 160,
+          lineNumber: 181,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],

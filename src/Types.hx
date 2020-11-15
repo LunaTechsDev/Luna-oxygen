@@ -73,6 +73,7 @@ enum abstract ChatterEvents(String) from String to String {
    */
   public var PUSHCHARNOTIF = 'pushCharacterNotification';
 
+  public var PUSHFACENOTIF = 'pushFaceNotification';
   public var HIDE = 'hide';
   public var CLOSE = 'close';
   public var OPEN = 'open';
