@@ -33,6 +33,12 @@ class ChatterWindow extends Window_Base {
   }
 
   #if compileMV
+  public override function drawTextEx(text: String, x: Float, y: Float): Float {
+    var newWidth = this.textWidth(text) > this.contentsWidth() ? this.textWidth(text) : this.contentsWidth();
+    this.move(this.x, this.y, newWidth, this.height);
+    this.createContents();
+    return super.drawTextEx(text, x, y);
+  }
   #else
   public override function drawTextEx(text: String, x: Float, y: Float, width: Float): Float {
     // resize window and recreate contents.

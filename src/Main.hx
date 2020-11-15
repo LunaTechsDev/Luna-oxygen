@@ -70,14 +70,18 @@ class Main {
     win.y -= (win.height + (offset.y));
   }
 
-  public static function pushTextNotification(text: String) {
+  public static function pushTextNotif(text: String) {
     ChatterEmitter.emit(ChatterEvents.PUSHNOTIF, text);
   }
 
-  public static function pushItemNotification(item: BaseItem, amount: Int) {
+  public static function pushItemNotif(item: BaseItem, amount: Int) {
     if (CHParams.enableItemNotifications) {
       ChatterEmitter.emit(ChatterEvents.PUSHITEMNOTIF, item, amount);
     }
+  }
+
+  public static function pushCharNotif(text: String, charName: String, charIndex: Int) {
+    ChatterEmitter.emit(ChatterEvents.PUSHCHARNOTIF, text, charName, charIndex);
   }
 
   public static function queueChatterWindow(win: ChatterWindow) {

@@ -404,7 +404,7 @@ SOFTWARE
     }
     gainItem(item, amount, includeEquip) {
       _Game_Party_gainItem.call(this, item, amount, includeEquip);
-      LunaChatter.pushItemNotification(item, amount);
+      LunaChatter.pushItemNotif(item, amount);
     }
     loseItem(item, amount, includeEquip) {
       _Game_Party_loseItem.call(this, item, amount, includeEquip);
@@ -415,7 +415,7 @@ SOFTWARE
         methodName: "loseItem",
         customParams: [amount],
       });
-      LunaChatter.pushItemNotification(item, amount);
+      LunaChatter.pushItemNotif(item, amount);
     }
   }
 
@@ -834,7 +834,7 @@ SOFTWARE
       let _Game_Party_gainItem = Game_Party.prototype.gainItem;
       Game_Party.prototype.gainItem = function (item, amount, includeEquip) {
         _Game_Party_gainItem.call(this, item, amount, includeEquip);
-        LunaChatter.pushItemNotification(item, amount);
+        LunaChatter.pushItemNotif(item, amount);
       };
       let _Game_Party_loseItem = Game_Party.prototype.loseItem;
       Game_Party.prototype.loseItem = function (item, amount, includeEquip) {
@@ -846,7 +846,7 @@ SOFTWARE
           methodName: "loseItem",
           customParams: [amount],
         });
-        LunaChatter.pushItemNotification(item, amount);
+        LunaChatter.pushItemNotif(item, amount);
       };
     }
     static showChatterEventWindow() {}
@@ -855,13 +855,21 @@ SOFTWARE
       win.x -= win.width / 2;
       win.y -= win.height + offset.y;
     }
-    static pushTextNotification(text) {
+    static pushTextNotif(text) {
       LunaChatter.ChatterEmitter.emit("pushNotification", text);
     }
-    static pushItemNotification(item, amount) {
+    static pushItemNotif(item, amount) {
       if (LunaChatter.CHParams.enableItemNotifications) {
         LunaChatter.ChatterEmitter.emit("pushItemNotification", item, amount);
       }
+    }
+    static pushCharNotif(text, charName, charIndex) {
+      LunaChatter.ChatterEmitter.emit(
+        "pushCharacterNotification",
+        text,
+        charName,
+        charIndex
+      );
     }
     static queueChatterWindow(win) {
       ChatterExtensions.enqueue(LunaChatter.chatterQueue, win);
