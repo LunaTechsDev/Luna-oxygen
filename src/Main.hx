@@ -1,8 +1,10 @@
+import rm.types.RPG.BaseItem;
 import Types;
 import macros.FnMacros;
 import rm.core.JsonEx;
 import rm.scenes.Scene_Map as RmScene_Map;
 import rm.windows.Window_Base as RmWindow_Base;
+import rm.objects.Game_Party as RmGame_Party;
 import core.Amaryllis;
 import utils.Comment;
 import utils.Fn;
@@ -50,6 +52,9 @@ class Main {
 
     Comment.title('Window_Base');
     FnMacros.jsPatch(true, RmWindow_Base, WindowBase);
+
+    Comment.title('Game_Party');
+    FnMacros.jsPatch(true, RmGame_Party, GameParty);
   }
 
   // ============================
@@ -66,6 +71,10 @@ class Main {
 
   public static function pushTextNotification(text: String) {
     ChatterEmitter.emit(ChatterEvents.PUSHNOTIF, text);
+  }
+
+  public static function pushItemNotification(item: BaseItem, amount: Int) {
+    ChatterEmitter.emit(ChatterEvents.PUSHITEMNOTIF, item, amount);
   }
 
   public static function queueChatterWindow(win: ChatterWindow) {

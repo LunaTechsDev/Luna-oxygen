@@ -2,7 +2,7 @@
  *
  *  Luna_ChatterMV.js
  * 
- *  Build Date: 11/9/2020
+ *  Build Date: 11/14/2020
  * 
  *  Made with LunaTea -- Haxe
  *
@@ -385,6 +385,28 @@ SOFTWARE
   }
 
   EReg.__name__ = true;
+  class GameParty extends Game_Party {
+    constructor() {
+      super();
+    }
+    gainItem(item, amount, includeEquip) {
+      _Game_Party_gainItem.call(this, item, amount, includeEquip);
+      LunaChatter.pushItemNotification(item, amount);
+    }
+    loseItem(item, amount, includeEquip) {
+      _Game_Party_loseItem.call(this, item, amount, includeEquip);
+      haxe_Log.trace("Lose Item amount", {
+        fileName: "src/GameParty.hx",
+        lineNumber: 14,
+        className: "GameParty",
+        methodName: "loseItem",
+        customParams: [amount],
+      });
+      LunaChatter.pushItemNotification(item, amount);
+    }
+  }
+
+  GameParty.__name__ = true;
   class Lambda {
     static iter(it, f) {
       let x = $getIterator(it);
@@ -464,7 +486,7 @@ SOFTWARE
       LunaChatter.CHParams.templateStrings = result1;
       haxe_Log.trace(LunaChatter.CHParams, {
         fileName: "src/Main.hx",
-        lineNumber: 46,
+        lineNumber: 48,
         className: "Main",
         methodName: "main",
       });
@@ -490,6 +512,28 @@ SOFTWARE
           listener.emit("queue", win);
           win.drawText(text, 0, 0, win.contentsWidth(), "left");
         });
+        listener.on("pushItemNotification", function (item, amount) {
+          let win = LunaChatter.chatterWindows.pop();
+          listener.emit("queue", win);
+          let sign = amount > 0 ? "+" : "-";
+          let textStr =
+            "" +
+            item.name +
+            " \\I[" +
+            item.iconIndex +
+            "] " +
+            sign +
+            " x" +
+            Math.abs(amount);
+          return win.drawTextEx(textStr, 0, 0);
+        });
+        listener.on("pushCharacterNotification", function (
+          text,
+          charImg,
+          index
+        ) {
+          return;
+        });
         listener.on("queue", function (win) {
           if (LunaChatter.chatterQueue.length == 0) {
             _gthis._notificationTimer =
@@ -498,7 +542,7 @@ SOFTWARE
           if (LunaChatter.chatterQueue.length > 0) {
             haxe_Log.trace("Update chatter queue windows", {
               fileName: "src/SceneMap.hx",
-              lineNumber: 39,
+              lineNumber: 56,
               className: "SceneMap",
               methodName: "setupLCNotificationEvents",
             });
@@ -625,7 +669,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 143,
+            lineNumber: 160,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -768,6 +812,27 @@ SOFTWARE
             _Window_Base_processEscapeCharacter.call(this, code, textState);
         }
       };
+
+      //=============================================================================
+      // Game_Party
+      //=============================================================================
+      let _Game_Party_gainItem = Game_Party.prototype.gainItem;
+      Game_Party.prototype.gainItem = function (item, amount, includeEquip) {
+        _Game_Party_gainItem.call(this, item, amount, includeEquip);
+        LunaChatter.pushItemNotification(item, amount);
+      };
+      let _Game_Party_loseItem = Game_Party.prototype.loseItem;
+      Game_Party.prototype.loseItem = function (item, amount, includeEquip) {
+        _Game_Party_loseItem.call(this, item, amount, includeEquip);
+        haxe_Log.trace("Lose Item amount", {
+          fileName: "src/GameParty.hx",
+          lineNumber: 14,
+          className: "GameParty",
+          methodName: "loseItem",
+          customParams: [amount],
+        });
+        LunaChatter.pushItemNotification(item, amount);
+      };
     }
     static showChatterEventWindow() {}
     static positionEventWindow(win) {
@@ -777,6 +842,9 @@ SOFTWARE
     }
     static pushTextNotification(text) {
       LunaChatter.ChatterEmitter.emit("pushNotification", text);
+    }
+    static pushItemNotification(item, amount) {
+      LunaChatter.ChatterEmitter.emit("pushItemNotification", item, amount);
     }
     static queueChatterWindow(win) {
       ChatterExtensions.enqueue(LunaChatter.chatterQueue, win);
@@ -805,6 +873,25 @@ SOFTWARE
         listener.emit("queue", win);
         win.drawText(text, 0, 0, win.contentsWidth(), "left");
       });
+      listener.on("pushItemNotification", function (item, amount) {
+        let win = LunaChatter.chatterWindows.pop();
+        listener.emit("queue", win);
+        return win.drawTextEx(
+          "" +
+            item.name +
+            " \\I[" +
+            item.iconIndex +
+            "] " +
+            (amount > 0 ? "+" : "-") +
+            " x" +
+            Math.abs(amount),
+          0,
+          0
+        );
+      });
+      listener.on("pushCharacterNotification", function (text, charImg, index) {
+        return;
+      });
       listener.on("queue", function (win) {
         if (LunaChatter.chatterQueue.length == 0) {
           _gthis._notificationTimer = LunaChatter.CHParams.notificationStayTime;
@@ -812,7 +899,7 @@ SOFTWARE
         if (LunaChatter.chatterQueue.length > 0) {
           haxe_Log.trace("Update chatter queue windows", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 39,
+            lineNumber: 56,
             className: "SceneMap",
             methodName: "setupLCNotificationEvents",
           });
@@ -929,7 +1016,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 143,
+          lineNumber: 160,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],

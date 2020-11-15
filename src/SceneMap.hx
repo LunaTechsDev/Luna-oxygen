@@ -1,3 +1,4 @@
+import rm.types.RPG.BaseItem;
 import rm.core.Graphics;
 import rm.Globals;
 import Types.ChatterEvents;
@@ -20,12 +21,28 @@ class SceneMap extends RmScene_Map {
   public function setupLCNotificationEvents() {
     var listener = Main.ChatterEmitter;
 
+    // Notifications
     listener.on(ChatterEvents.PUSHNOTIF, (text: String) -> {
       // Start Queue and Transition Window
       var win = Main.chatterWindows.pop();
       listener.emit(ChatterEvents.QUEUE, win);
       win.drawText(text, 0, 0, win.contentsWidth(), 'left');
     });
+
+    listener.on(ChatterEvents.PUSHITEMNOTIF, (item: BaseItem, amount: Int) -> {
+      var win = Main.chatterWindows.pop();
+      listener.emit(ChatterEvents.QUEUE, win);
+      var sign = amount > 0 ? '+' : '-';
+
+      var textStr = '${item.name} \\I[${item.iconIndex}] ${sign} x${Math.abs(amount)}';
+      #if compileMV
+      win.drawTextEx(textStr, 0, 0);
+      #else
+      win.drawTextEx(textStr, 0, 0, win.contentsWidth());
+      #end
+    });
+
+    listener.on(ChatterEvents.PUSHCHARNOTIF, (text: String, charImg: String, index: Int) -> {});
 
     listener.on(ChatterEvents.QUEUE, (win: ChatterWindow) -> {
       // Reset Timer

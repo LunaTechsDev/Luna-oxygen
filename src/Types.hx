@@ -60,6 +60,18 @@ enum abstract ChatterEvents(String) from String to String {
   public var SHOW = 'show';
   public var PUSH = 'push';
   public var PUSHNOTIF = 'pushNotification';
+
+  /**
+   * Pushes an item notification with gain or loss.
+   */
+  public var PUSHITEMNOTIF = 'pushItemNotification';
+
+  /**
+   * Pushes a notification to the window that displays the character
+   * face and other information.
+   */
+  public var PUSHCHARNOTIF = 'pushCharacterNotification';
+
   public var HIDE = 'hide';
   public var CLOSE = 'close';
   public var OPEN = 'open';
