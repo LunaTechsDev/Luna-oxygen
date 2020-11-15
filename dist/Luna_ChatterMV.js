@@ -24,6 +24,11 @@
 @desc The amount of time in frames, that the notification should stay on screen.
 @default 300
 
+@param enableItemNotifications
+@text Enable Item Notifications
+@desc Automatically  send item notifications when items are gained or lost(true/false).
+@default true
+
 
 @param animationTypeNotification
 @text Animation Type (Notification)
@@ -465,6 +470,8 @@ SOFTWARE
         marginPadding: tmp10,
         animationTypeNotification: tmp11,
         notificationStayTime: parseInt(string7, 10),
+        enableItemNotifications:
+          LunaChatter.params["enableItemNotifications"].trim() == "true",
       };
       let _this = LunaChatter.CHParams.templateJSStrings;
       let result = new Array(_this.length);
@@ -486,7 +493,7 @@ SOFTWARE
       LunaChatter.CHParams.templateStrings = result1;
       haxe_Log.trace(LunaChatter.CHParams, {
         fileName: "src/Main.hx",
-        lineNumber: 48,
+        lineNumber: 49,
         className: "Main",
         methodName: "main",
       });
@@ -844,7 +851,9 @@ SOFTWARE
       LunaChatter.ChatterEmitter.emit("pushNotification", text);
     }
     static pushItemNotification(item, amount) {
-      LunaChatter.ChatterEmitter.emit("pushItemNotification", item, amount);
+      if (LunaChatter.CHParams.enableItemNotifications) {
+        LunaChatter.ChatterEmitter.emit("pushItemNotification", item, amount);
+      }
     }
     static queueChatterWindow(win) {
       ChatterExtensions.enqueue(LunaChatter.chatterQueue, win);

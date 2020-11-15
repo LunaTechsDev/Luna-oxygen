@@ -13,6 +13,11 @@
 @desc The amount of time in frames, that the notification should stay on screen.
 @default 300
 
+@param enableItemNotifications
+@text Enable Item Notifications
+@desc Automatically  send item notifications when items are gained or lost(true/false).
+@default true
+
 
 @param animationTypeNotification
 @text Animation Type (Notification)

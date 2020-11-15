@@ -40,7 +40,8 @@ class Main {
       maxChatterWindows: Fn.parseIntJs(params['maxChatterWindows']),
       marginPadding: Fn.parseIntJs(params['marginPadding']),
       animationTypeNotification: params['animationTypeNotification'].trim(),
-      notificationStayTime: Fn.parseIntJs(params['notificationStayTime'])
+      notificationStayTime: Fn.parseIntJs(params['notificationStayTime']),
+      enableItemNotifications: params['enableItemNotifications'].trim() == 'true'
     }
 
     CHParams.templateJSStrings = cast CHParams.templateJSStrings.map((ts) -> JsonEx.parse(cast ts));
@@ -74,7 +75,9 @@ class Main {
   }
 
   public static function pushItemNotification(item: BaseItem, amount: Int) {
-    ChatterEmitter.emit(ChatterEvents.PUSHITEMNOTIF, item, amount);
+    if (CHParams.enableItemNotifications) {
+      ChatterEmitter.emit(ChatterEvents.PUSHITEMNOTIF, item, amount);
+    }
   }
 
   public static function queueChatterWindow(win: ChatterWindow) {
