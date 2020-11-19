@@ -189,12 +189,9 @@ SOFTWARE
   class ChatterWindow extends Window_Base {
     constructor(x, y, width, height) {
       super(x, y, width, height);
-      this.setBGType();
+      this.setBackgroundType(LunaChatter.CHParams.backgroundType);
       this._shadowX = this.x;
       this._shadowY = this.y;
-    }
-    setBGType() {
-      this.setBackgroundType(LunaChatter.CHParams.backgroundType);
     }
     setupEvents(fn) {
       fn(this);
@@ -316,11 +313,29 @@ SOFTWARE
   class ChatterEventWindow extends ChatterWindow {
     constructor(x, y, width, height) {
       super(x, y, width, height);
+      this.setBGType();
       this.hovered = false;
       this.playerInRange = false;
     }
-    setBGType() {
-      this.setBackgroundType(LunaChatter.CHParams.eventBackgroundType);
+    setBGType(num) {
+      if (num != null) {
+        if (num == null) {
+          this.setBackgroundType(2);
+        } else {
+          switch (num) {
+            case 0:
+              this.setBackgroundType(0);
+              break;
+            case 1:
+              this.setBackgroundType(1);
+              break;
+            default:
+              this.setBackgroundType(2);
+          }
+        }
+      } else {
+        this.setBackgroundType(LunaChatter.CHParams.eventBackgroundType);
+      }
     }
     setEvent(evt) {
       this.event = evt;
@@ -365,6 +380,22 @@ SOFTWARE
         this.emit("onHover", this);
       } else {
         this.emit("onHoverOut", this);
+      }
+    }
+    drawByType(str, x, y, width, align) {
+      let re = new EReg("<lcevent:\\s*(\\w+)\\s+(\\d)>", "ig");
+      let imgRe = new EReg("<lceventImg:\\s*(\\w+)\\s+(\\d)>", "ig");
+      let _hx_tmp;
+      if (re.match(str) == true) {
+        this.drawTextEx(re.matched(1), x, y);
+        let string = re.matched(2);
+        this.setBGType(parseInt(string, 10));
+      } else {
+        _hx_tmp = imgRe.match(str);
+        if (_hx_tmp == true) {
+          let string = imgRe.matched(2);
+          this.setBGType(parseInt(string, 10));
+        }
       }
     }
   }
@@ -420,6 +451,13 @@ SOFTWARE
       this.r.m = this.r.exec(s);
       this.r.s = s;
       return this.r.m != null;
+    }
+    matched(n) {
+      if (this.r.m != null && n >= 0 && n < this.r.m.length) {
+        return this.r.m[n];
+      } else {
+        throw haxe_Exception.thrown("EReg::matched");
+      }
     }
   }
 
@@ -734,11 +772,9 @@ SOFTWARE
         _Scene_Map_createAllWindows.call(this);
         if (LunaChatter.CHParams.enableNotifications) {
           this.createAllLCWindows();
-        }
-        this.createAllLCEventWindows();
-        if (LunaChatter.CHParams.enableNotifications) {
           this.setupLCNotificationEvents();
         }
+        this.createAllLCEventWindows();
       };
       let _Scene_Map_createAllLCWindows =
         Scene_Map.prototype.createAllLCWindows;
@@ -770,7 +806,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 204,
+            lineNumber: 202,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -781,9 +817,21 @@ SOFTWARE
         Scene_Map.prototype.createAllLCEventWindows;
       Scene_Map.prototype.createAllLCEventWindows = function () {
         let mapEvents = $gameMap.events();
+        let re = new EReg("<lcevent:\\s*(\\w+)\\s+(\\w+)>", "ig");
+        let imgRe = new EReg("<lceventImg:\\s*(\\w+)\\s+(\\w+)>", "ig");
         let _gthis = this;
         if (LunaChatter.CHParams.enableEventNames) {
-          Lambda.iter(mapEvents, function (event) {
+          let _g = [];
+          let _g1 = 0;
+          let _g2 = mapEvents;
+          while (_g1 < _g2.length) {
+            let v = _g2[_g1];
+            ++_g1;
+            if (re.match(v.event().note) || imgRe.match(v.event().note)) {
+              _g.push(v);
+            }
+          }
+          Lambda.iter(_g, function (event) {
             let chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
             chatterEventWindow.setEvent(event);
             Lambda.iter(_gthis._spriteset._characterSprites, function (
@@ -837,8 +885,8 @@ SOFTWARE
           }
         });
         currentWindow.on("paint", function (win) {
-          win.drawText(
-            win.event.event().name,
+          win.drawByType(
+            win.event.event().note,
             0,
             0,
             win.contentsWidth(),
@@ -1144,11 +1192,9 @@ SOFTWARE
       _Scene_Map_createAllWindows.call(this);
       if (LunaChatter.CHParams.enableNotifications) {
         this.createAllLCWindows();
-      }
-      this.createAllLCEventWindows();
-      if (LunaChatter.CHParams.enableNotifications) {
         this.setupLCNotificationEvents();
       }
+      this.createAllLCEventWindows();
     }
     createAllLCWindows() {
       let _g = 0;
@@ -1176,7 +1222,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 204,
+          lineNumber: 202,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],
@@ -1185,9 +1231,20 @@ SOFTWARE
     }
     createAllLCEventWindows() {
       let mapEvents = $gameMap.events();
+      let re = new EReg("<lcevent:\\s*(\\w+)\\s+(\\w+)>", "ig");
+      let imgRe = new EReg("<lceventImg:\\s*(\\w+)\\s+(\\w+)>", "ig");
       let _gthis = this;
       if (LunaChatter.CHParams.enableEventNames) {
-        Lambda.iter(mapEvents, function (event) {
+        let _g = [];
+        let _g1 = 0;
+        while (_g1 < mapEvents.length) {
+          let v = mapEvents[_g1];
+          ++_g1;
+          if (re.match(v.event().note) || imgRe.match(v.event().note)) {
+            _g.push(v);
+          }
+        }
+        Lambda.iter(_g, function (event) {
           let chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
           chatterEventWindow.setEvent(event);
           Lambda.iter(_gthis._spriteset._characterSprites, function (
@@ -1239,8 +1296,8 @@ SOFTWARE
         }
       });
       currentWindow.on("paint", function (win) {
-        win.drawText(
-          win.event.event().name,
+        win.drawByType(
+          win.event.event().note,
           0,
           0,
           win.contentsWidth(),
@@ -1309,6 +1366,29 @@ SOFTWARE
   }
 
   core_Amaryllis.__name__ = true;
+  class haxe_Exception extends Error {
+    constructor(message, previous, native) {
+      super(message);
+      this.message = message;
+      this.__previousException = previous;
+      this.__nativeException = native != null ? native : this;
+    }
+    get_native() {
+      return this.__nativeException;
+    }
+    static thrown(value) {
+      if (value instanceof haxe_Exception) {
+        return value.get_native();
+      } else if (value instanceof Error) {
+        return value;
+      } else {
+        let e = new haxe_ValueException(value);
+        return e;
+      }
+    }
+  }
+
+  haxe_Exception.__name__ = true;
   class haxe_Log {
     static formatOutput(v, infos) {
       let str = Std.string(v);
@@ -1332,6 +1412,14 @@ SOFTWARE
   }
 
   haxe_Log.__name__ = true;
+  class haxe_ValueException extends haxe_Exception {
+    constructor(value, previous, native) {
+      super(String(value), previous, native);
+      this.value = value;
+    }
+  }
+
+  haxe_ValueException.__name__ = true;
   class haxe_iterators_ArrayIterator {
     constructor(array) {
       this.current = 0;

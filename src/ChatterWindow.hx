@@ -21,13 +21,9 @@ class ChatterWindow extends Window_Base {
     var rect = new Rectangle(x, y, width, height);
     super(rect);
     #end
-    this.setBGType();
+    this.setBackgroundType(Main.CHParams.backgroundType);
     this._shadowX = this.x;
     this._shadowY = this.y;
-  }
-
-  public function setBGType() {
-    this.setBackgroundType(Main.CHParams.backgroundType);
   }
 
   public function setupEvents(fn: (win: ChatterWindow) -> Void) {

@@ -1,3 +1,4 @@
+import utils.Fn;
 import rm.core.TouchInput;
 import Types.ChatterEvents;
 import rm.Globals;
@@ -14,12 +15,24 @@ class ChatterEventWindow extends ChatterWindow {
 
   public function new(x: Int, y: Int, width: Int, height: Int) {
     super(x, y, width, height);
+    this.setBGType();
     this.hovered = false;
     this.playerInRange = false;
   }
 
-  public override function setBGType() {
-    this.setBackgroundType(Main.CHParams.eventBackgroundType);
+  public function setBGType(?num: Int) {
+    if (num != null) {
+      switch (num) {
+        case 0:
+          this.setBackgroundType(0);
+        case 1:
+          this.setBackgroundType(1);
+        case _:
+          this.setBackgroundType(2);
+      }
+    } else {
+      this.setBackgroundType(Main.CHParams.eventBackgroundType);
+    }
   }
 
   public function setEvent(evt: Game_Event) {
@@ -67,6 +80,25 @@ class ChatterEventWindow extends ChatterWindow {
       this.emit(ChatterEvents.ONHOVER, this);
     } else {
       this.emit(ChatterEvents.ONHOVEROUT, this);
+    }
+  }
+
+  public function drawByType(str: String, x: Float, y: Float, width: Float, align: String) {
+    var re = ~/<lcevent:\s*(\w+)\s+(\d)>/ig;
+    var imgRe = ~/<lceventImg:\s*(\w+)\s+(\d)>/ig;
+    switch (str) {
+      case re.match(_) => true:
+        #if compileMV
+        this.drawTextEx(re.matched(1), x, y);
+        #else
+        this.drawTextEx(re.matched(1), x, y, width);
+        #end
+
+        this.setBGType(Fn.parseIntJs(re.matched(2)));
+      case imgRe.match(_) => true:
+        this.setBGType(Fn.parseIntJs(imgRe.matched(2)));
+      case _:
+        // Do Nothing
     }
   }
 }

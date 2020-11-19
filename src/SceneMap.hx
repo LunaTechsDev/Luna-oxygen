@@ -174,12 +174,10 @@ class SceneMap extends RmScene_Map {
     untyped _Scene_Map_createAllWindows.call(this);
     if (Main.CHParams.enableNotifications) {
       this.createAllLCWindows();
+      this.setupLCNotificationEvents();
     }
 
     this.createAllLCEventWindows();
-    if (Main.CHParams.enableNotifications) {
-      this.setupLCNotificationEvents();
-    }
   }
 
   public function createAllLCWindows() {
@@ -209,8 +207,11 @@ class SceneMap extends RmScene_Map {
     // Scan Events With Notetags to show event information
     var mapEvents = Globals.GameMap.events();
     // Add NoteTag Check Later -- + Add Events
+    var re = ~/<lcevent:\s*(\w+)\s+(\w+)>/ig;
+    var imgRe = ~/<lceventImg:\s*(\w+)\s+(\w+)>/ig;
+
     if (Main.CHParams.enableEventNames) {
-      mapEvents.iter((event) -> {
+      mapEvents.filter(event -> re.match(event.event().note) || imgRe.match(event.event().note)).iter((event) -> {
         var chatterEventWindow = new ChatterEventWindow(0, 0, 100, 100);
         chatterEventWindow.setEvent(event);
 
@@ -261,7 +262,7 @@ class SceneMap extends RmScene_Map {
     });
 
     currentWindow.on(ChatterEvents.PAINT, (win: ChatterEventWindow) -> {
-      win.drawText(win.event.event().name, 0, 0, win.contentsWidth(), 'center');
+      win.drawByType(win.event.event().note, 0, 0, win.contentsWidth(), 'center');
     });
   }
 
