@@ -1,3 +1,4 @@
+import js.lib.Function;
 import core.Amaryllis;
 import rm.core.Rectangle;
 import Types.ChatterEvents;
@@ -11,6 +12,7 @@ class ChatterWindow extends Window_Base {
   public var _shadowX: Float;
   public var _shadowY: Float;
   public var _shadowOpacity: Float;
+  public var _fn: (ChatterWindow) -> Void;
 
   public function new(x: Int, y: Int, width: Int, height: Int) {
     #if compileMV
@@ -61,12 +63,22 @@ class ChatterWindow extends Window_Base {
     }
   }
 
+  public function moveByWithFn(x: Float, ?y: Float, fn: (ChatterWindow) -> Void) {
+    this._fn = fn;
+    this.moveBy(x, y);
+  }
+
   public function fadeTo(opacity: Float) {
     this._shadowOpacity = opacity;
   }
 
   public function fadeBy(opacity: Float) {
     this._shadowOpacity += opacity;
+  }
+
+  public function fadeToWithFn(opacity: Float, fn: (ChatterWindow) -> Void) {
+    this._fn = fn;
+    this.fadeTo(opacity);
   }
 
   public override function update() {
@@ -93,6 +105,10 @@ class ChatterWindow extends Window_Base {
     if (this._shadowX == this.x && this._shadowY == this.y) {
       // Disable Movement When matching
       // this._moveWait = -1;
+      if (this._fn != null) {
+        this._fn(this);
+        this._fn = null;
+      }
     }
     var xDiff = Math.abs(this._shadowX - this.x);
     var yDiff = Math.abs(this._shadowY - this.y);
@@ -109,6 +125,12 @@ class ChatterWindow extends Window_Base {
 
   public function updateFade() {
     ChatterExtensions.updateFade(this._shadowOpacity, cast this);
+    if (this._shadowOpacity == this.opacity) {
+      if (this._fn != null) {
+        this._fn(this);
+        this._fn = null;
+      }
+    }
   }
 
   public function paint() {

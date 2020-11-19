@@ -2,7 +2,7 @@
  *
  *  Luna_Chatter.js
  * 
- *  Build Date: 11/14/2020
+ *  Build Date: 11/18/2020
  * 
  *  Made with LunaTea -- Haxe
  *
@@ -211,11 +211,19 @@ SOFTWARE
         this._shadowY += y;
       }
     }
+    moveByWithFn(x, y, fn) {
+      this._fn = fn;
+      this.moveBy(x, y);
+    }
     fadeTo(opacity) {
       this._shadowOpacity = opacity;
     }
     fadeBy(opacity) {
       this._shadowOpacity += opacity;
+    }
+    fadeToWithFn(opacity, fn) {
+      this._fn = fn;
+      this.fadeTo(opacity);
     }
     update() {
       super.update();
@@ -236,6 +244,12 @@ SOFTWARE
       }
       if (this._shadowY != this.y) {
         yResult = core_Amaryllis.lerp(this.y, this._shadowY, 0.025);
+      }
+      if (this._shadowX == this.x && this._shadowY == this.y) {
+        if (this._fn != null) {
+          this._fn(this);
+          this._fn = null;
+        }
       }
       if (Math.abs(this._shadowX - this.x) < 0.5) {
         xResult = Math.round(xResult);
@@ -260,6 +274,12 @@ SOFTWARE
         opacityResult = Math.round(opacityResult);
       }
       displayObj.opacity = opacityResult;
+      if (this._shadowOpacity == this.opacity) {
+        if (this._fn != null) {
+          this._fn(this);
+          this._fn = null;
+        }
+      }
     }
     paint() {
       if (this.contents != null) {
@@ -549,6 +569,7 @@ SOFTWARE
         ) {
           let win = LunaChatter.chatterWindows.pop();
           win.drawCharacter(charImg, index, 0, 0);
+          listener.emit("queue", win);
           let charWidth = 48;
           return win.drawTextEx(text, charWidth, 0, win.contentsWidth());
         });
@@ -570,7 +591,7 @@ SOFTWARE
           if (LunaChatter.chatterQueue.length > 0) {
             haxe_Log.trace("Update chatter queue windows", {
               fileName: "src/SceneMap.hx",
-              lineNumber: 77,
+              lineNumber: 78,
               className: "SceneMap",
               methodName: "setupLCNotificationEvents",
             });
@@ -599,6 +620,8 @@ SOFTWARE
               _gthis.handleSlideOut(win);
               break;
           }
+
+          LunaChatter.chatterWindows.unshift(win);
         });
       };
       let _Scene_Map_handleSlideMove = Scene_Map.prototype.handleSlideMove;
@@ -639,16 +662,32 @@ SOFTWARE
       Scene_Map.prototype.handleSlideOut = function (win) {
         switch (LunaChatter.CHParams.anchorPosition) {
           case "bottomLeft":
-            win.moveBy(-win.width, 0);
+            win.moveByWithFn(
+              -win.width,
+              0,
+              $bind(this, this.handleResetPosition)
+            );
             break;
           case "bottomRight":
-            win.moveBy(win.width, 0);
+            win.moveByWithFn(
+              win.width,
+              0,
+              $bind(this, this.handleResetPosition)
+            );
             break;
           case "topLeft":
-            win.moveBy(-win.width, 0);
+            win.moveByWithFn(
+              -win.width,
+              0,
+              $bind(this, this.handleResetPosition)
+            );
             break;
           case "topRight":
-            win.moveBy(win.width, 0);
+            win.moveByWithFn(
+              win.width,
+              0,
+              $bind(this, this.handleResetPosition)
+            );
             break;
         }
       };
@@ -659,6 +698,27 @@ SOFTWARE
       let _Scene_Map_handleFadeOut = Scene_Map.prototype.handleFadeOut;
       Scene_Map.prototype.handleFadeOut = function (win) {
         win.fadeTo(0);
+      };
+      let _Scene_Map_handleResetPosition =
+        Scene_Map.prototype.handleResetPosition;
+      Scene_Map.prototype.handleResetPosition = function (win) {
+        let pos;
+        switch (LunaChatter.CHParams.anchorPosition) {
+          case "bottomLeft":
+            pos = { x: -win.width, y: Graphics.boxHeight };
+            break;
+          case "bottomRight":
+            pos = { x: Graphics.boxWidth, y: Graphics.boxHeight };
+            break;
+          case "topLeft":
+            pos = { x: -win.width, y: 0 };
+            break;
+          case "topRight":
+            pos = { x: Graphics.boxWidth, y: 0 };
+            break;
+        }
+
+        win.moveTo(pos.x, pos.y);
       };
       let _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
       Scene_Map.prototype.createAllWindows = function () {
@@ -697,7 +757,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 181,
+            lineNumber: 198,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -931,6 +991,7 @@ SOFTWARE
       listener.on("pushCharacterNotification", function (text, charImg, index) {
         let win = LunaChatter.chatterWindows.pop();
         win.drawCharacter(charImg, index, 0, 0);
+        listener.emit("queue", win);
         return win.drawTextEx(text, 48, 0, win.contentsWidth());
       });
       listener.on("pushFaceNotification", function (text, faceName, faceIndex) {
@@ -945,7 +1006,7 @@ SOFTWARE
         if (LunaChatter.chatterQueue.length > 0) {
           haxe_Log.trace("Update chatter queue windows", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 77,
+            lineNumber: 78,
             className: "SceneMap",
             methodName: "setupLCNotificationEvents",
           });
@@ -974,6 +1035,8 @@ SOFTWARE
             _gthis.handleSlideOut(win);
             break;
         }
+
+        LunaChatter.chatterWindows.unshift(win);
       });
     }
     handleSlideMove(win) {
@@ -1011,16 +1074,24 @@ SOFTWARE
     handleSlideOut(win) {
       switch (LunaChatter.CHParams.anchorPosition) {
         case "bottomLeft":
-          win.moveBy(-win.width, 0);
+          win.moveByWithFn(
+            -win.width,
+            0,
+            $bind(this, this.handleResetPosition)
+          );
           break;
         case "bottomRight":
-          win.moveBy(win.width, 0);
+          win.moveByWithFn(win.width, 0, $bind(this, this.handleResetPosition));
           break;
         case "topLeft":
-          win.moveBy(-win.width, 0);
+          win.moveByWithFn(
+            -win.width,
+            0,
+            $bind(this, this.handleResetPosition)
+          );
           break;
         case "topRight":
-          win.moveBy(win.width, 0);
+          win.moveByWithFn(win.width, 0, $bind(this, this.handleResetPosition));
           break;
       }
     }
@@ -1029,6 +1100,25 @@ SOFTWARE
     }
     handleFadeOut(win) {
       win.fadeTo(0);
+    }
+    handleResetPosition(win) {
+      let pos;
+      switch (LunaChatter.CHParams.anchorPosition) {
+        case "bottomLeft":
+          pos = { x: -win.width, y: Graphics.boxHeight };
+          break;
+        case "bottomRight":
+          pos = { x: Graphics.boxWidth, y: Graphics.boxHeight };
+          break;
+        case "topLeft":
+          pos = { x: -win.width, y: 0 };
+          break;
+        case "topRight":
+          pos = { x: Graphics.boxWidth, y: 0 };
+          break;
+      }
+
+      win.moveTo(pos.x, pos.y);
     }
     createAllWindows() {
       _Scene_Map_createAllWindows.call(this);
@@ -1062,7 +1152,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 181,
+          lineNumber: 198,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],

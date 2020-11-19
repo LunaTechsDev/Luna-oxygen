@@ -46,6 +46,7 @@ class SceneMap extends RmScene_Map {
       // Show Character face, then text
       var win = Main.chatterWindows.pop();
       win.drawCharacter(charImg, index, 0, 0);
+      listener.emit(ChatterEvents.QUEUE, win);
       var charWidth = 48;
       #if compileMV
       win.drawTextEx(text, charWidth, 0);
@@ -93,6 +94,8 @@ class SceneMap extends RmScene_Map {
         case FADE:
           this.handleFadeOut(win);
       }
+      // Place the latest dequeued window back in the window list.
+      Main.chatterWindows.unshift(win);
     });
   }
 
@@ -131,16 +134,16 @@ class SceneMap extends RmScene_Map {
   public function handleSlideOut(win: ChatterWindow) {
     switch (Main.CHParams.anchorPosition) {
       case TOPLEFT:
-        win.moveBy(-win.width, 0);
+        win.moveByWithFn(-win.width, 0, this.handleResetPosition);
 
       case TOPRIGHT:
-        win.moveBy(win.width, 0);
+        win.moveByWithFn(win.width, 0, this.handleResetPosition);
 
       case BOTTOMLEFT:
-        win.moveBy(-win.width, 0);
+        win.moveByWithFn(-win.width, 0, this.handleResetPosition);
 
       case BOTTOMRIGHT:
-        win.moveBy(win.width, 0);
+        win.moveByWithFn(win.width, 0, this.handleResetPosition);
     }
   }
 
@@ -150,6 +153,20 @@ class SceneMap extends RmScene_Map {
 
   public function handleFadeOut(win: ChatterWindow) {
     win.fadeTo(0);
+  }
+
+  public function handleResetPosition(win: ChatterWindow) {
+    var pos = switch (Main.CHParams.anchorPosition) {
+      case BOTTOMLEFT:
+        { x: -win.width, y: Graphics.boxHeight };
+      case BOTTOMRIGHT:
+        { x: Graphics.boxWidth, y: Graphics.boxHeight };
+      case TOPLEFT:
+        { x: -win.width, y: 0 }
+      case TOPRIGHT:
+        { x: Graphics.boxWidth, y: 0 };
+    }
+    win.moveTo(pos.x, pos.y);
   }
 
   public override function createAllWindows() {
