@@ -201,8 +201,10 @@ SOFTWARE
         this.textWidth(text) > this.contentsWidth()
           ? this.textWidth(text)
           : this.contentsWidth();
-      this.move(this.x, this.y, newWidth, this.height);
-      this.createContents();
+      if (!(newWidth > this.textWidth(text))) {
+        this.move(this.x, this.y, newWidth, this.height);
+        this.createContents();
+      }
       return super.drawTextEx(text, x, y);
     }
     moveTo(x, y) {
@@ -885,13 +887,7 @@ SOFTWARE
           }
         });
         currentWindow.on("paint", function (win) {
-          win.drawByType(
-            win.event.event().note,
-            0,
-            0,
-            win.contentsWidth(),
-            "center"
-          );
+          win.drawByType(win.event.event().note, 0, 0, win.width, "center");
         });
       };
       let _Scene_Map_update = Scene_Map.prototype.update;
@@ -1296,13 +1292,7 @@ SOFTWARE
         }
       });
       currentWindow.on("paint", function (win) {
-        win.drawByType(
-          win.event.event().note,
-          0,
-          0,
-          win.contentsWidth(),
-          "center"
-        );
+        win.drawByType(win.event.event().note, 0, 0, win.width, "center");
       });
     }
     updateChatterNotifications() {

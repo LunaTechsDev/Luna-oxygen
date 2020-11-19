@@ -262,7 +262,7 @@ class SceneMap extends RmScene_Map {
     });
 
     currentWindow.on(ChatterEvents.PAINT, (win: ChatterEventWindow) -> {
-      win.drawByType(win.event.event().note, 0, 0, win.contentsWidth(), 'center');
+      win.drawByType(win.event.event().note, 0, 0, win.width, 'center');
     });
   }
 
