@@ -30,6 +30,7 @@ typedef CHParams = {
   var animationTypeNotification: NotifAnimType;
   var notificationStayTime: Int;
   var enableItemNotifications: Bool;
+  var enableNotifications: Bool;
 };
 
 enum abstract NotifAnimType(String) from String to String {

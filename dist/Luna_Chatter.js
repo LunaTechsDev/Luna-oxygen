@@ -19,6 +19,11 @@
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
 
+@param enableNotifications
+@text Enable Notifications
+@desc Enable Notifications within the chatter system (true/false).
+@default true
+
 @param notificationStayTime
 @text Notification Stay Time
 @desc The amount of time in frames, that the notification should stay on screen.
@@ -500,6 +505,8 @@ SOFTWARE
         notificationStayTime: parseInt(string7, 10),
         enableItemNotifications:
           LunaChatter.params["enableItemNotifications"].trim() == "true",
+        enableNotifications:
+          LunaChatter.params["enableNotifications"].trim() == "true",
       };
       let _this = LunaChatter.CHParams.templateJSStrings;
       let result = new Array(_this.length);
@@ -521,7 +528,7 @@ SOFTWARE
       LunaChatter.CHParams.templateStrings = result1;
       haxe_Log.trace(LunaChatter.CHParams, {
         fileName: "src/Main.hx",
-        lineNumber: 49,
+        lineNumber: 50,
         className: "Main",
         methodName: "main",
       });
@@ -693,11 +700,12 @@ SOFTWARE
       };
       let _Scene_Map_handleFadeIn = Scene_Map.prototype.handleFadeIn;
       Scene_Map.prototype.handleFadeIn = function (win) {
+        this.handleSlideIn(win);
         win.fadeTo(255);
       };
       let _Scene_Map_handleFadeOut = Scene_Map.prototype.handleFadeOut;
       Scene_Map.prototype.handleFadeOut = function (win) {
-        win.fadeTo(0);
+        win.fadeToWithFn(0, $bind(this, this.handleResetPosition));
       };
       let _Scene_Map_handleResetPosition =
         Scene_Map.prototype.handleResetPosition;
@@ -723,9 +731,13 @@ SOFTWARE
       let _Scene_Map_createAllWindows = Scene_Map.prototype.createAllWindows;
       Scene_Map.prototype.createAllWindows = function () {
         _Scene_Map_createAllWindows.call(this);
-        this.createAllLCWindows();
+        if (LunaChatter.CHParams.enableNotifications) {
+          this.createAllLCWindows();
+        }
         this.createAllLCEventWindows();
-        this.setupLCNotificationEvents();
+        if (LunaChatter.CHParams.enableNotifications) {
+          this.setupLCNotificationEvents();
+        }
       };
       let _Scene_Map_createAllLCWindows =
         Scene_Map.prototype.createAllLCWindows;
@@ -757,7 +769,7 @@ SOFTWARE
           this.addWindow(chatterWindow);
           haxe_Log.trace("Created ", {
             fileName: "src/SceneMap.hx",
-            lineNumber: 198,
+            lineNumber: 204,
             className: "SceneMap",
             methodName: "createAllLCWindows",
             customParams: [x + 1, " windows"],
@@ -929,20 +941,27 @@ SOFTWARE
       win.y -= win.height + offset.y;
     }
     static pushTextNotif(text) {
-      LunaChatter.ChatterEmitter.emit("pushNotification", text);
+      if (LunaChatter.CHParams.enableNotifications) {
+        LunaChatter.ChatterEmitter.emit("pushNotification", text);
+      }
     }
     static pushItemNotif(item, amount) {
-      if (LunaChatter.CHParams.enableItemNotifications) {
+      if (
+        LunaChatter.CHParams.enableItemNotifications &&
+        LunaChatter.CHParams.enableNotifications
+      ) {
         LunaChatter.ChatterEmitter.emit("pushItemNotification", item, amount);
       }
     }
     static pushCharNotif(text, charName, charIndex) {
-      LunaChatter.ChatterEmitter.emit(
-        "pushCharacterNotification",
-        text,
-        charName,
-        charIndex
-      );
+      if (LunaChatter.CHParams.enableNotifications) {
+        LunaChatter.ChatterEmitter.emit(
+          "pushCharacterNotification",
+          text,
+          charName,
+          charIndex
+        );
+      }
     }
     static queueChatterWindow(win) {
       ChatterExtensions.enqueue(LunaChatter.chatterQueue, win);
@@ -1096,10 +1115,11 @@ SOFTWARE
       }
     }
     handleFadeIn(win) {
+      this.handleSlideIn(win);
       win.fadeTo(255);
     }
     handleFadeOut(win) {
-      win.fadeTo(0);
+      win.fadeToWithFn(0, $bind(this, this.handleResetPosition));
     }
     handleResetPosition(win) {
       let pos;
@@ -1122,9 +1142,13 @@ SOFTWARE
     }
     createAllWindows() {
       _Scene_Map_createAllWindows.call(this);
-      this.createAllLCWindows();
+      if (LunaChatter.CHParams.enableNotifications) {
+        this.createAllLCWindows();
+      }
       this.createAllLCEventWindows();
-      this.setupLCNotificationEvents();
+      if (LunaChatter.CHParams.enableNotifications) {
+        this.setupLCNotificationEvents();
+      }
     }
     createAllLCWindows() {
       let _g = 0;
@@ -1152,7 +1176,7 @@ SOFTWARE
         this.addWindow(chatterWindow);
         haxe_Log.trace("Created ", {
           fileName: "src/SceneMap.hx",
-          lineNumber: 198,
+          lineNumber: 204,
           className: "SceneMap",
           methodName: "createAllLCWindows",
           customParams: [x + 1, " windows"],

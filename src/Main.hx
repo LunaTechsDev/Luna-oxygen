@@ -41,7 +41,8 @@ class Main {
       marginPadding: Fn.parseIntJs(params['marginPadding']),
       animationTypeNotification: params['animationTypeNotification'].trim(),
       notificationStayTime: Fn.parseIntJs(params['notificationStayTime']),
-      enableItemNotifications: params['enableItemNotifications'].trim() == 'true'
+      enableItemNotifications: params['enableItemNotifications'].trim() == 'true',
+      enableNotifications: params['enableNotifications'].trim() == 'true'
     }
 
     CHParams.templateJSStrings = cast CHParams.templateJSStrings.map((ts) -> JsonEx.parse(cast ts));
@@ -71,17 +72,21 @@ class Main {
   }
 
   public static function pushTextNotif(text: String) {
-    ChatterEmitter.emit(ChatterEvents.PUSHNOTIF, text);
+    if (CHParams.enableNotifications) {
+      ChatterEmitter.emit(ChatterEvents.PUSHNOTIF, text);
+    }
   }
 
   public static function pushItemNotif(item: BaseItem, amount: Int) {
-    if (CHParams.enableItemNotifications) {
+    if (CHParams.enableItemNotifications && CHParams.enableNotifications) {
       ChatterEmitter.emit(ChatterEvents.PUSHITEMNOTIF, item, amount);
     }
   }
 
   public static function pushCharNotif(text: String, charName: String, charIndex: Int) {
-    ChatterEmitter.emit(ChatterEvents.PUSHCHARNOTIF, text, charName, charIndex);
+    if (CHParams.enableNotifications) {
+      ChatterEmitter.emit(ChatterEvents.PUSHCHARNOTIF, text, charName, charIndex);
+    }
   }
 
   public static function queueChatterWindow(win: ChatterWindow) {

@@ -8,6 +8,11 @@
 @desc The audio files to use when playing sound
 @type struct<SoundFile>[]
 
+@param enableNotifications
+@text Enable Notifications
+@desc Enable Notifications within the chatter system (true/false).
+@default true
+
 @param notificationStayTime
 @text Notification Stay Time
 @desc The amount of time in frames, that the notification should stay on screen.

@@ -148,11 +148,12 @@ class SceneMap extends RmScene_Map {
   }
 
   public function handleFadeIn(win: ChatterWindow) {
+    this.handleSlideIn(win);
     win.fadeTo(255);
   }
 
   public function handleFadeOut(win: ChatterWindow) {
-    win.fadeTo(0);
+    win.fadeToWithFn(0, this.handleResetPosition);
   }
 
   public function handleResetPosition(win: ChatterWindow) {
@@ -171,9 +172,14 @@ class SceneMap extends RmScene_Map {
 
   public override function createAllWindows() {
     untyped _Scene_Map_createAllWindows.call(this);
-    this.createAllLCWindows();
+    if (Main.CHParams.enableNotifications) {
+      this.createAllLCWindows();
+    }
+
     this.createAllLCEventWindows();
-    this.setupLCNotificationEvents();
+    if (Main.CHParams.enableNotifications) {
+      this.setupLCNotificationEvents();
+    }
   }
 
   public function createAllLCWindows() {
@@ -281,7 +287,6 @@ class SceneMap extends RmScene_Map {
 
   // ======================
   // Chatter Windows
-
   public function showChatterWindow(win: ChatterWindow) {
     win.show();
   }
