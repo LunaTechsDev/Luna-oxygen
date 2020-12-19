@@ -1,38 +1,45 @@
 -lib LunaTea
--lib hxnodejs
 
 -cp src
 # JS Version 
 -D js-es=6
 
-# Static Code Analysis For Removing  Unnecessary Code
--D analyzer-optimize 
-# -D js_source_map
-# Haxe Source Map
-# -D source-map-content
-
 # Enable/Disable console.log -- tracing with the below line
 # --no-traces
 
-# Generate Documentation
-# -D doc_gen
-# -D js_classic
 -dce full
 
+# Static Code Analysis For Removing  Unnecessary Code
+-D analyzer-optimize 
+
+# Haxe Source Map
+--debug
+# --no-inline
+# --no-opt
+# -D keep_inline_positions
+
 # RM Version for Conditional Compilation
+# -D compileMV
 
 # Note you can call an hxml file inside an hxml file for build purposes.
 # For Compiling Separate JavaScript Files
---macro macros.MacroTools.includeJsLib("./src/LunaChatterParams.js")
+
+
+
+--macro macros.MacroTools.includeJsLib("./src/Params.js")
+
 -main Main
 --each
 
 --next
--js dist/Luna_Chatter.js
-# You can include plugin parameters as a macro in your compile.hxml
---next
+-js dist/Luna_Shooter.js
+
+--next 
 -D compileMV
--js dist/Luna_ChatterMV.js
+-js dist/Luna_ShooterMV.js
+
 
 --cmd 'npx napkin'
 --cmd haxe -D gamePath=../games/LunaTechsMZ --run CleanJs
+--cmd haxe -D gamePath=../games/ValentineProject --run CleanJs
+

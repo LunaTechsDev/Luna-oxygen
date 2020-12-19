@@ -1,3 +1,3 @@
-# Luna Chatter
+# Luna Config
 ### Author LunaTechs - Kino
-> A plugin that allows you to create notification windows and create event labels for all your events.
+> This plugin allows you to modify additional presets in RPGMakerMV/MZ.

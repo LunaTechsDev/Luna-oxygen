@@ -27,7 +27,7 @@ class CleanJs {
   }
 
   public static function main() {
-    final attributionStr = File.read("Attribution.txt").readAll().toString();
+    final attributionStr = "";
     final distDir = "dist";
     final madeWith = "Made with LunaTea -- Haxe";
     final allFiles = FileSystem.readDirectory(distDir);
@@ -52,6 +52,8 @@ class CleanJs {
           || lineContent.contains("#haxeui")
           || lineContent.contains("haxe_ui")
           || lineContent.contains("return")
+          || lineContent.contains("super(")
+          || lineContent.contains("fragSrc")
           && !lineContent.contains("_$LTGlobals_$")) {
           return lineContent;
         } else {
@@ -63,6 +65,7 @@ class CleanJs {
       }).join("\n");
 
       final newContent = fileNameStr + buildDate + madeWithStr + attributionStr + "\n" + cleanContents;
+      // final newContent = cleanContents;
       File.write(filePath).writeString(contents);
       var gamePath: String = generatePluginGamePath();
       trace(gamePath);
