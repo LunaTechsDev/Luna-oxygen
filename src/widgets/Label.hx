@@ -14,32 +14,45 @@ typedef LabelConfig = {
    */
   var bgColor: String;
 
+  var ?textColor: String;
   var text: String;
   var ?align: String;
 }
 
 class Label extends Sprite {
-  public var config: LabelConfig;
-  public var text(get, set): String;
+  public var bgColor: String;
+  public var text: String;
+  public var textColor: String;
+  public var align: String;
 
   public function new(labelConfig: LabelConfig) {
     super();
-    this.config = labelConfig;
+    this.set(labelConfig);
     this.bitmap = new Bitmap(width, height);
+  }
+
+  public function set(config: LabelConfig) {
+    this.x = config.x;
+    this.y = config.y;
+    this.width = config.width;
+    this.height = config.height;
+    this.text = config.text;
+    this.bgColor = config.bgColor;
+    this.textColor = config.textColor;
+    this.align = config.align;
   }
 
   public function resize(width: Float, height: Float) {
     this.bitmap = new Bitmap(width, height);
   }
 
-  function get_text(): String {
-    return this.config.text;
+  override public function update() {
+    super.update();
+    this.updateText();
   }
 
-  function set_text(text: String): String {
-    this.config.text = text;
-    var lineHeight = this.config.height - 2;
-    this.bitmap.drawText(this.config.text, 0, 0, this.config.width, lineHeight, 'left');
-    return this.config.text;
+  public function updateText() {
+    var lineHeight = this.height - 2;
+    this.bitmap.drawText(this.text, 0, 0, this.width, lineHeight, this.align);
   }
 }

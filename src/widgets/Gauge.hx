@@ -1,5 +1,6 @@
 package widgets;
 
+import rm.core.Bitmap;
 import rm.core.Sprite;
 
 typedef GaugeConfig = {
@@ -12,31 +13,32 @@ typedef GaugeConfig = {
   var rate: Float;
 }
 
+@:keep
 class Gauge extends Sprite {
-  public var config: GaugeConfig;
+  public var bgColor: String;
+  public var color: String;
+  public var rate: Float;
 
   public function new(config: GaugeConfig) {
     super();
-    this.config = config;
+    this.set(config);
+    this.bitmap = new Bitmap(this.width, this.height);
   }
 
-  function get_color(): String {
-    return this.config.color;
+  public function set(config: GaugeConfig) {
+    this.x = config.x;
+    this.y = config.y;
+    this.width = config.width;
+    this.height = config.height;
+    this.rate = config.rate;
+    this.bgColor = config.bgColor;
+    this.color = config.color;
   }
 
-  function set_color(color: String): String {
-    this.config.color = color;
-
-    return this.config.color;
+  override public function update() {
+    super.update();
+    this.updateGauge();
   }
 
-  function get_bgColor(): String {
-    return this.config.bgColor;
-  }
-
-  function set_bgColor(color: String): String {
-    this.config.bgColor = color;
-
-    return this.config.bgColor;
-  }
+  public function updateGauge() {}
 }

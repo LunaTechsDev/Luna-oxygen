@@ -1,3 +1,4 @@
+import widgets.Gauge;
 import macros.FnMacros;
 import rm.windows.Window_Base as RmWindow_Base;
 
@@ -16,5 +17,15 @@ class Main {
 
     Comment.title('Window_Base');
     FnMacros.jsPatch(true, RmWindow_Base, WindowBase);
+    var gauge = new Gauge({
+      x: 100,
+      y: 100,
+      width: 50,
+      height: 100,
+      rate: .70,
+      bgColor: 'black',
+      color: 'red'
+    });
+    trace(gauge);
   }
 }
