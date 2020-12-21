@@ -1,3 +1,3 @@
-# Luna Config
+# Luna Oxygen
 ### Author LunaTechs - Kino
-> This plugin allows you to modify additional presets in RPGMakerMV/MZ.
+> This plugin allows you to create User Interfaces quickly in RPGMakerMV/MZ.

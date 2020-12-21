@@ -6,7 +6,7 @@ import rm.windows.Window_Base as RmWindow_Base;
 class Main {
   public static var Params: Params;
   public static var params = Globals.Plugins.filter((plugin) ->
-    ~/<LunaConfig>/ig.match(plugin.description))[0].parameters;
+    ~/<LunaOxygen>/ig.match(plugin.description))[0].parameters;
 
   public static function main() {
     Comment.title('Parameter Setup');

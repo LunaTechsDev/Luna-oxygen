@@ -1,6 +1,6 @@
 /*:
 @author LunaTechs - Kino
-@plugindesc This plugin allows you to modify additional presets in RPGMakerMV/MZ <LunaConfig>.
+@plugindesc This plugin allows you to create User Interfaces quickly in RPGMakerMV/MZ<LunaOxygen>.
 
 @target MV MZ
 
