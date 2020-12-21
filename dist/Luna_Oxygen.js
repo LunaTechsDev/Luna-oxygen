@@ -82,7 +82,7 @@ SOFTWARE
       Window_Base.prototype.updateBackOpacity = function () {
         this.backOpacity = LunaConfig.Params.windowBackOpacity;
       };
-      let gauge = new widgets_Gauge({
+      let gauge = new OxGauge({
         x: 100,
         y: 100,
         width: 50,
@@ -233,42 +233,108 @@ SOFTWARE
   }
 
   js_Boot.__name__ = true;
-  class widgets_Gauge extends Sprite {
-    constructor(config) {
+  class OxUISystem extends PIXI.utils.EventEmitter {
+    constructor() {
       super();
-      this.config = config;
     }
-    get_color() {
-      return this.config.color;
+    setLayout(layout) {
+      this.currentLayout = layout;
     }
-    set_color(color) {
-      this.config.color = color;
-      return this.config.color;
+    addToScene() {
+      let currentScene = SceneManager._scene;
+      currentScene.addChild(this.currentLayout);
     }
-    get_bgColor() {
-      return this.config.bgColor;
+    start() {
+      this.isStarted = true;
+      this.emit("start");
     }
-    set_bgColor(color) {
-      this.config.bgColor = color;
-      return this.config.bgColor;
+    update() {
+      this.emit("update");
     }
-    get_rate() {
-      return this.config.rate;
-    }
-    set_rate(rate) {
-      this.config.rate = rate;
-      return this.config.rate;
-    }
-    set_height(height) {
-      this.config.height = height;
-      return this.config.height;
-    }
-    get_height() {
-      return this.config.height;
+    stop() {
+      this.isStarted = false;
+      this.emit("stop");
     }
   }
 
-  widgets_Gauge.__name__ = true;
+  $hx_exports["OxUISystem"] = OxUISystem;
+  OxUISystem.__name__ = true;
+  class OxGauge extends Sprite {
+    constructor(config) {
+      super();
+      this.set(config);
+      this.bitmap = new Bitmap(this.width, this.height);
+    }
+    set(config) {
+      this.x = config.x;
+      this.y = config.y;
+      this.width = config.width;
+      this.height = config.height;
+      this.rate = config.rate;
+      this.bgColor = config.bgColor;
+      this.color = config.color;
+    }
+    update() {
+      super.update();
+      this.updateGauge();
+    }
+    updateGauge() {}
+  }
+
+  $hx_exports["OxGauge"] = OxGauge;
+  OxGauge.__name__ = true;
+  class OxLabel extends Sprite {
+    constructor(labelConfig) {
+      super();
+      this.set(labelConfig);
+      this.bitmap = new Bitmap(this.width, this.height);
+    }
+    set(config) {
+      this.x = config.x;
+      this.y = config.y;
+      this.width = config.width;
+      this.height = config.height;
+      this.text = config.text;
+      this.bgColor = config.bgColor;
+      this.textColor = config.textColor;
+      this.align = config.align;
+    }
+    resize(width, height) {
+      this.bitmap = new Bitmap(width, height);
+    }
+    update() {
+      super.update();
+      this.updateText();
+    }
+    updateText() {
+      let lineHeight = this.height - 2;
+      if (
+        this.width != this.bitmap.width ||
+        this.height != this.bitmap.height
+      ) {
+        this.bitmap = new Bitmap(this.width, this.height);
+        this.bitmap._baseTexture.update();
+      }
+      this.bitmap.clear();
+      this.bitmap.fillRect(0, 0, this.width, this.height, this.bgColor);
+      this.bitmap.textColor = this.textColor;
+      this.bitmap.drawText(this.text, 0, 0, this.width, lineHeight, this.align);
+    }
+  }
+
+  $hx_exports["OxLabel"] = OxLabel;
+  OxLabel.__name__ = true;
+  class OxLayout extends PIXI.Container {
+    constructor() {
+      super();
+    }
+    childrenCount() {
+      return this.children.length;
+    }
+  }
+
+  $hx_exports["OxLayout"] = OxLayout;
+  OxLayout.__name__ = true;
   String.__name__ = true;
   Array.__name__ = true;
   js_Boot.__toStr = {}.toString;

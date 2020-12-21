@@ -25,6 +25,9 @@
 # For Compiling Separate JavaScript Files
 
 
+--macro include('widgets')
+--macro include('system')
+
 
 --macro macros.MacroTools.includeJsLib("./src/Params.js")
 

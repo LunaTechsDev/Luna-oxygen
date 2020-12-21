@@ -19,6 +19,9 @@ typedef LabelConfig = {
   var ?align: String;
 }
 
+@:keep
+@:native('OxLabel')
+@:expose('OxLabel')
 class Label extends Sprite {
   public var bgColor: String;
   public var text: String;
@@ -53,6 +56,13 @@ class Label extends Sprite {
 
   public function updateText() {
     var lineHeight = this.height - 2;
+    if (this.width != this.bitmap.width || this.height != this.bitmap.height) {
+      this.bitmap = new Bitmap(this.width, this.height);
+      this.bitmap.updateTexture();
+    }
+    this.bitmap.clear();
+    this.bitmap.fillRect(0, 0, this.width, this.height, this.bgColor);
+    this.bitmap.textColor = this.textColor;
     this.bitmap.drawText(this.text, 0, 0, this.width, lineHeight, this.align);
   }
 }

@@ -104,4 +104,9 @@ class BitmapExt {
     untyped bitmap._baseTexture.update();
     #end
   }
+
+  public static function clear(bitmap: Bitmap) {
+    var context = bitmap.context;
+    context.clearRect(0, 0, bitmap.width, bitmap.height);
+  }
 }

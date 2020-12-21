@@ -11,13 +11,19 @@ typedef GaugeConfig = {
   var bgColor: String;
   var color: String;
   var rate: Float;
+  var leftStyle: GaugeStyle;
+  var rightStyle: GaugeStyle;
 }
 
 @:keep
+@:native('OxGauge')
+@:expose('OxGauge')
 class Gauge extends Sprite {
   public var bgColor: String;
   public var color: String;
   public var rate: Float;
+  public var leftStyle: GaugeStyle;
+  public var rightStyle: GaugeStyle;
 
   public function new(config: GaugeConfig) {
     super();
