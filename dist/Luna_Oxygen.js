@@ -83,30 +83,44 @@ SOFTWARE
         this.backOpacity = LunaConfig.Params.windowBackOpacity;
       };
       let gauge = new OxGauge({
-        x: 100,
-        y: 100,
+        x: 0,
+        y: 0,
         width: 100,
         height: 25,
         rate: 0.7,
         bgColor: "black",
-        color: "red",
+        color: "white",
         leftStyle: "lB",
-        rightStyle: "rA",
+        rightStyle: "lA",
       });
-      console.log("src/Main.hx:31:", gauge);
+      let panel = new OxPanel({
+        x: 200,
+        y: 300,
+        width: 250,
+        height: 250,
+        bgColor: "pink",
+      });
+      panel.addChild(gauge);
+      haxe_Log.trace(gauge, {
+        fileName: "src/Main.hx",
+        lineNumber: 41,
+        className: "Main",
+        methodName: "main",
+      });
+      console.log(panel);
     }
   }
 
   $hx_exports["LunaConfig"] = LunaConfig;
   LunaConfig.__name__ = true;
   Math.__name__ = true;
-  class StringTools {
-    static replace(s, sub, by) {
-      return s.split(sub).join(by);
+  class Std {
+    static string(s) {
+      return js_Boot.__string_rec(s, "");
     }
   }
 
-  StringTools.__name__ = true;
+  Std.__name__ = true;
   class WindowBase extends Window_Base {
     constructor(rect) {
       super(rect);
@@ -117,6 +131,33 @@ SOFTWARE
   }
 
   WindowBase.__name__ = true;
+  class haxe_Log {
+    static formatOutput(v, infos) {
+      let str = Std.string(v);
+      if (infos == null) {
+        return str;
+      }
+      let pstr = infos.fileName + ":" + infos.lineNumber;
+      if (infos.customParams != null) {
+        let _g = 0;
+        let _g1 = infos.customParams;
+        while (_g < _g1.length) {
+          let v = _g1[_g];
+          ++_g;
+          str += ", " + Std.string(v);
+        }
+      }
+      return pstr + ": " + str;
+    }
+    static trace(v, infos) {
+      let str = haxe_Log.formatOutput(v, infos);
+      if (typeof console != "undefined" && console.log != null) {
+        console.log(str);
+      }
+    }
+  }
+
+  haxe_Log.__name__ = true;
   class haxe_iterators_ArrayIterator {
     constructor(array) {
       this.current = 0;
@@ -343,6 +384,11 @@ SOFTWARE
       }
 
       switch (this.rightStyle) {
+        case "lA":
+          ctx.lineTo(this.width * rate, 0);
+          ctx.lineTo((this.width - this.height / 2) * rate, this.height / 2);
+          ctx.lineTo(this.width * rate, this.height);
+          break;
         case "lS":
           ctx.lineTo((this.width - this.height / 2) * rate, 0);
           ctx.lineTo(this.width * rate, this.height);
@@ -373,7 +419,7 @@ SOFTWARE
 
   $hx_exports["OxGauge"] = OxGauge;
   OxGauge.__name__ = true;
-  class widgets_Panel extends PIXI.Graphics {
+  class OxPanel extends PIXI.Container {
     constructor(config) {
       super();
       this.set(config);
@@ -381,15 +427,28 @@ SOFTWARE
     set(config) {
       this.x = config.x;
       this.y = config.y;
-      this.width = config.width;
-      this.height = config.height;
+      this._width = config.width;
+      this._height = config.height;
       this.bgColor = config.bgColor;
-      this.update();
+      haxe_Log.trace(this.width, {
+        fileName: "src/widgets/Panel.hx",
+        lineNumber: 35,
+        className: "widgets.Panel",
+        methodName: "set",
+        customParams: [this._width, config.width],
+      });
+      this.createBackground();
+    }
+    createBackground() {
+      this.background = new Sprite();
+      this.background.bitmap = new Bitmap(this._width, this._height);
+      this.background.bitmap.fillAll(this.bgColor);
+      this.addChild(this.background);
     }
     update() {
       this.emit("update");
-      this.updateChildren();
       this.updateBackground();
+      this.updateChildren();
     }
     updateChildren() {
       let _g = 0;
@@ -397,24 +456,20 @@ SOFTWARE
       while (_g < _g1.length) {
         let child = _g1[_g];
         ++_g;
-        if (child.hasOwnProperty("update")) {
+        if (child.update != null) {
           child.update();
         }
       }
     }
     updateBackground() {
-      let bm = new Bitmap();
-      bm.context.fillStyle = this.bgColor;
-      let color = StringTools.replace(bm.context.fillStyle, "#", "0x");
-      this.fill = parseInt(color, 10);
-      this.beginFill();
-      this.drawRect(0, 0, this.width, this.height);
-      this.endFill();
+      this.background.bitmap.clear();
+      this.background.bitmap.fillAll(this.bgColor);
     }
   }
 
-  widgets_Panel.__name__ = true;
-  class widgets_GridPanel extends widgets_Panel {
+  $hx_exports["OxPanel"] = OxPanel;
+  OxPanel.__name__ = true;
+  class OxGridPanel extends OxPanel {
     constructor(config) {
       super(config);
     }
@@ -426,7 +481,8 @@ SOFTWARE
     }
   }
 
-  widgets_GridPanel.__name__ = true;
+  $hx_exports["OxGridPanel"] = OxGridPanel;
+  OxGridPanel.__name__ = true;
   class OxLabel extends Sprite {
     constructor(labelConfig) {
       super();

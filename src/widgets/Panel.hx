@@ -1,7 +1,8 @@
 package widgets;
 
+import rm.core.Sprite;
+import pixi.core.display.Container;
 import rm.core.Bitmap;
-import pixi.core.graphics.Graphics;
 
 typedef PanelConfig = {
   var x: Float;
@@ -14,8 +15,11 @@ typedef PanelConfig = {
 @:keep
 @:native('OxPanel')
 @:expose('OxPanel')
-class Panel extends Graphics {
+class Panel extends Container {
   public var bgColor: String;
+  public var background: Sprite;
+  public var _width: Float;
+  public var _height: Float;
 
   public function new(config: PanelConfig) {
     super();
@@ -25,33 +29,36 @@ class Panel extends Graphics {
   public function set(config: PanelConfig) {
     this.x = config.x;
     this.y = config.y;
-    this.width = config.width;
-    this.height = config.height;
+    this._width = config.width;
+    this._height = config.height;
     this.bgColor = config.bgColor;
-    this.update();
+    trace(this.width, this._width, config.width);
+    this.createBackground();
+  }
+
+  public function createBackground() {
+    this.background = new Sprite();
+    this.background.bitmap = new Bitmap(this._width, this._height);
+    this.background.bitmap.fillAll(this.bgColor);
+    this.addChild(this.background);
   }
 
   public function update() {
     this.emit(UPDATE);
-    this.updateChildren();
     this.updateBackground();
+    this.updateChildren();
   }
 
   public function updateChildren() {
     for (child in this.children) {
-      if (Fn.hasProperty(child, 'update')) {
+      if (untyped child.update != null) {
         untyped child.update();
       }
     }
   }
 
   public function updateBackground() {
-    var bm = new Bitmap();
-    bm.context.fillStyle = this.bgColor;
-    var color = bm.context.fillStyle.replace('#', '0x');
-    this.fill = cast Fn.parseIntJs(color);
-    this.beginFill();
-    this.drawRect(0, 0, this.width, this.height);
-    this.endFill();
+    this.background.bitmap.clear();
+    this.background.bitmap.fillAll(this.bgColor);
   }
 }

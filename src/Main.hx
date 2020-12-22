@@ -19,15 +19,15 @@ class Main {
     Comment.title('Window_Base');
     FnMacros.jsPatch(true, RmWindow_Base, WindowBase);
     var gauge = new Gauge({
-      x: 100,
-      y: 100,
+      x: 0,
+      y: 0,
       width: 100,
       height: 25,
       rate: .70,
       bgColor: 'black',
       color: 'white',
       leftStyle: LBOX,
-      rightStyle: RARROW,
+      rightStyle: LARROW,
     });
 
     var panel = new Panel({
@@ -39,5 +39,6 @@ class Main {
     });
     panel.addChild(gauge);
     trace(gauge);
+    untyped console.log(panel);
   }
 }

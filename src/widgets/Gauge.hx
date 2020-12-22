@@ -45,6 +45,7 @@ class Gauge extends Sprite {
 
   override public function update() {
     super.update();
+
     this.updateGauge();
   }
 
