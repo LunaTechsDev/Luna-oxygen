@@ -1,3 +1,6 @@
+import widgets.TilingPic;
+import rm.managers.ImageManager;
+import widgets.Pic;
 import widgets.Panel;
 import widgets.Gauge;
 import macros.FnMacros;
@@ -30,6 +33,24 @@ class Main {
       rightStyle: LARROW,
     });
 
+    var pic = new Pic({
+      x: 0,
+      y: 26,
+      width: 150,
+      height: 125,
+      bitmap: ImageManager.loadPicture('Forest')
+    });
+
+    var tpic = new TilingPic({
+      x: 0,
+      y: 130,
+      width: 150,
+      height: 125,
+      bitmap: ImageManager.loadPicture('Forest'),
+      scrollX: -0.64,
+      scrollY: 0.3
+    });
+
     var panel = new Panel({
       x: 200,
       y: 300,
@@ -38,6 +59,8 @@ class Main {
       bgColor: 'pink'
     });
     panel.addChild(gauge);
+    panel.addChild(pic);
+    panel.addChild(tpic);
     trace(gauge);
     untyped console.log(panel);
   }

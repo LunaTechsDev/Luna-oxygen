@@ -4,10 +4,7 @@ import rm.core.Bitmap;
 import rm.core.Sprite;
 
 typedef GaugeConfig = {
-  var x: Float;
-  var y: Float;
-  var width: Float;
-  var height: Float;
+  > UIElement,
   var bgColor: String;
   var color: String;
   var rate: Float;

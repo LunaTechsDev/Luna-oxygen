@@ -1,3 +1,10 @@
+typedef UIElement = {
+  var x: Float;
+  var y: Float;
+  var width: Float;
+  var height: Float;
+}
+
 typedef Params = {
   var windowBackOpacity: Int;
 };

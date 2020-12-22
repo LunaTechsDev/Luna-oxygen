@@ -61,4 +61,11 @@ class Panel extends Container {
     this.background.bitmap.clear();
     this.background.bitmap.fillAll(this.bgColor);
   }
+
+  public function move(x: Float, ?y: Float) {
+    this.x = x;
+    if (y != null) {
+      this.y = y;
+    }
+  }
 }

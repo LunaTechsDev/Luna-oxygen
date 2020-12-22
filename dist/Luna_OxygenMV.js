@@ -93,6 +93,22 @@ SOFTWARE
         leftStyle: "lB",
         rightStyle: "lA",
       });
+      let pic = new widgets_Pic({
+        x: 0,
+        y: 26,
+        width: 150,
+        height: 125,
+        bitmap: ImageManager.loadPicture("Forest"),
+      });
+      let tpic = new widgets_TilingPic({
+        x: 0,
+        y: 130,
+        width: 150,
+        height: 125,
+        bitmap: ImageManager.loadPicture("Forest"),
+        scrollX: -0.64,
+        scrollY: 0.3,
+      });
       let panel = new OxPanel({
         x: 200,
         y: 300,
@@ -101,9 +117,11 @@ SOFTWARE
         bgColor: "pink",
       });
       panel.addChild(gauge);
+      panel.addChild(pic);
+      panel.addChild(tpic);
       haxe_Log.trace(gauge, {
         fileName: "src/Main.hx",
-        lineNumber: 41,
+        lineNumber: 64,
         className: "Main",
         methodName: "main",
       });
@@ -465,6 +483,12 @@ SOFTWARE
       this.background.bitmap.clear();
       this.background.bitmap.fillAll(this.bgColor);
     }
+    move(x, y) {
+      this.x = x;
+      if (y != null) {
+        this.y = y;
+      }
+    }
   }
 
   $hx_exports["OxPanel"] = OxPanel;
@@ -536,6 +560,80 @@ SOFTWARE
 
   $hx_exports["OxLayout"] = OxLayout;
   OxLayout.__name__ = true;
+  class widgets_Pic extends Sprite {
+    constructor(config) {
+      super();
+      this.set(config);
+    }
+    set(config) {
+      this.x = config.x;
+      this.y = config.y;
+      this.width = config.width;
+      this.height = config.height;
+      this.bitmap = new Bitmap(this.width, this.height);
+      this.setPic(config.bitmap);
+    }
+    setPic(bitmap) {
+      let _gthis = this;
+      bitmap.addLoadListener(function (newBitmap) {
+        _gthis.bitmap.clear();
+        _gthis.bitmap.blt(
+          newBitmap,
+          0,
+          0,
+          newBitmap.width,
+          newBitmap.height,
+          0,
+          0,
+          _gthis.bitmap.width,
+          _gthis.bitmap.height
+        );
+      });
+    }
+  }
+
+  widgets_Pic.__name__ = true;
+  class widgets_TilingPic extends widgets_Pic {
+    constructor(config) {
+      super(config);
+    }
+    set(config) {
+      let tpConfig = config;
+      this.scrollX = tpConfig.scrollX;
+      this.scrollY = tpConfig.scrollY;
+      super.set(config);
+    }
+    setPic(bitmap) {
+      let _gthis = this;
+      bitmap.addLoadListener(function (newBitmap) {
+        _gthis.bitmap.clear();
+        _gthis.bitmap.blt(
+          newBitmap,
+          0,
+          0,
+          newBitmap.width,
+          newBitmap.height,
+          0,
+          0,
+          _gthis.bitmap.width,
+          _gthis.bitmap.height
+        );
+        _gthis.tilingSprite = new TilingSprite(_gthis.bitmap);
+        _gthis.tilingSprite.move(0, 0, _gthis.width, _gthis.height);
+        _gthis.addChild(_gthis.tilingSprite);
+      });
+    }
+    update() {
+      super.update();
+      this.updateTiling();
+    }
+    updateTiling() {
+      this.tilingSprite.origin.x += this.scrollX;
+      this.tilingSprite.origin.y += this.scrollY;
+    }
+  }
+
+  widgets_TilingPic.__name__ = true;
   String.__name__ = true;
   Array.__name__ = true;
   js_Boot.__toStr = {}.toString;
