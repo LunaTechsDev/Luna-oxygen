@@ -322,12 +322,20 @@ SOFTWARE
           break;
         case "lS":
           ctx.moveTo(this.height / 2, this.height);
-          ctx.lineTo(0, this.height);
+          ctx.lineTo(0, 0);
+          break;
+        case "rS":
+          ctx.moveTo(0, this.height);
+          ctx.lineTo(this.height / 2, 0);
           break;
         default:
       }
 
       switch (this.rightStyle) {
+        case "lS":
+          ctx.lineTo(this.width - this.height / 2, 0);
+          ctx.lineTo(this.width, this.height);
+          break;
         case "rA":
           ctx.lineTo(this.width - this.height / 2, 0);
           ctx.lineTo(this.width, this.height / 2);

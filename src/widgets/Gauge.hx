@@ -69,10 +69,10 @@ class Gauge extends Sprite {
       // Do nothing
       case LSLANT:
         ctx.moveTo(this.height / 2, this.height);
-        ctx.lineTo(0, this.height);
+        ctx.lineTo(0, 0);
       case RSLANT:
         ctx.moveTo(0, this.height);
-        ctx.lineTo(this.height / 2, this.height);
+        ctx.lineTo(this.height / 2, 0);
       case _:
         // Do nothing
     }
