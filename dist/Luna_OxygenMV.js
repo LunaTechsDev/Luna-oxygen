@@ -304,9 +304,13 @@ SOFTWARE
     }
     updateGauge() {
       this.bitmap.clear();
-      this.paintGauge();
+      this.paintGauge(this.bgColor);
+      this.paintGauge(this.color, this.rate);
     }
-    paintGauge() {
+    paintGauge(color, rate) {
+      if (rate == null) {
+        rate = 1.0;
+      }
       let ctx = this.bitmap.context;
       ctx.save();
       ctx.beginPath();
@@ -333,27 +337,27 @@ SOFTWARE
 
       switch (this.rightStyle) {
         case "lS":
-          ctx.lineTo(this.width - this.height / 2, 0);
-          ctx.lineTo(this.width, this.height);
+          ctx.lineTo((this.width - this.height / 2) * rate, 0);
+          ctx.lineTo(this.width * rate, this.height);
           break;
         case "rA":
-          ctx.lineTo(this.width - this.height / 2, 0);
-          ctx.lineTo(this.width, this.height / 2);
-          ctx.lineTo(this.width - this.height / 2, this.height);
+          ctx.lineTo((this.width - this.height / 2) * rate, 0);
+          ctx.lineTo(this.width * rate, this.height / 2);
+          ctx.lineTo((this.width - this.height / 2) * rate, this.height);
           break;
         case "rB":
-          ctx.lineTo(this.width, 0);
-          ctx.lineTo(this.width, this.height);
+          ctx.lineTo(this.width * rate, 0);
+          ctx.lineTo(this.width * rate, this.height);
           break;
         case "rS":
-          ctx.lineTo(this.width, 0);
-          ctx.lineTo(this.width - this.height / 2, this.height);
+          ctx.lineTo(this.width * rate, 0);
+          ctx.lineTo((this.width - this.height / 2) * rate, this.height);
           break;
         default:
       }
 
       ctx.closePath();
-      ctx.fillStyle = this.color;
+      ctx.fillStyle = color;
       ctx.fill();
       this.bitmap._setDirty();
       ctx.restore();

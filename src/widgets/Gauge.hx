@@ -50,10 +50,12 @@ class Gauge extends Sprite {
 
   public function updateGauge() {
     this.bitmap.clear();
-    this.paintGauge();
+    // PaintBG
+    this.paintGauge(this.bgColor); // Paint Top
+    this.paintGauge(this.color, this.rate);
   }
 
-  public function paintGauge() {
+  public function paintGauge(color: String, ?rate: Float = 1.0) {
     var ctx = this.bitmap.context;
     ctx.save();
     ctx.beginPath();
@@ -82,28 +84,28 @@ class Gauge extends Sprite {
     switch (this.rightStyle) {
       case RBOX:
         // Do nothing
-        ctx.lineTo(this.width, 0);
-        ctx.lineTo(this.width, this.height);
+        ctx.lineTo(this.width * rate, 0);
+        ctx.lineTo(this.width * rate, this.height);
 
       // Close Shape
 
       case RARROW:
-        ctx.lineTo(this.width - (this.height / 2), 0);
-        ctx.lineTo(this.width, this.height / 2);
-        ctx.lineTo(this.width - (this.height / 2), this.height);
+        ctx.lineTo((this.width - (this.height / 2)) * rate, 0);
+        ctx.lineTo(this.width * rate, this.height / 2);
+        ctx.lineTo((this.width - (this.height / 2)) * rate, this.height);
       // Do nothing
       case RSLANT:
-        ctx.lineTo(this.width, 0);
-        ctx.lineTo(this.width - (this.height / 2), this.height);
+        ctx.lineTo(this.width * rate, 0);
+        ctx.lineTo((this.width - (this.height / 2)) * rate, this.height);
       case LSLANT:
-        ctx.lineTo(this.width - (this.height / 2), 0);
-        ctx.lineTo(this.width, this.height);
+        ctx.lineTo((this.width - (this.height / 2)) * rate, 0);
+        ctx.lineTo(this.width * rate, this.height);
 
       case _:
         // Do nothing
     }
     ctx.closePath();
-    ctx.fillStyle = this.color;
+    ctx.fillStyle = color;
     ctx.fill();
     this.bitmap.updateTexture();
     ctx.restore();
