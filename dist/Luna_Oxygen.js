@@ -2,7 +2,7 @@
  *
  *  Luna_Oxygen.js
  * 
- *  Build Date: 12/21/2020
+ *  Build Date: 12/22/2020
  * 
  *  Made with LunaTea -- Haxe
  *
@@ -100,6 +100,13 @@ SOFTWARE
   $hx_exports["LunaConfig"] = LunaConfig;
   LunaConfig.__name__ = true;
   Math.__name__ = true;
+  class StringTools {
+    static replace(s, sub, by) {
+      return s.split(sub).join(by);
+    }
+  }
+
+  StringTools.__name__ = true;
   class WindowBase extends Window_Base {
     constructor(rect) {
       super(rect);
@@ -366,6 +373,60 @@ SOFTWARE
 
   $hx_exports["OxGauge"] = OxGauge;
   OxGauge.__name__ = true;
+  class widgets_Panel extends PIXI.Graphics {
+    constructor(config) {
+      super();
+      this.set(config);
+    }
+    set(config) {
+      this.x = config.x;
+      this.y = config.y;
+      this.width = config.width;
+      this.height = config.height;
+      this.bgColor = config.bgColor;
+      this.update();
+    }
+    update() {
+      this.emit("update");
+      this.updateChildren();
+      this.updateBackground();
+    }
+    updateChildren() {
+      let _g = 0;
+      let _g1 = this.children;
+      while (_g < _g1.length) {
+        let child = _g1[_g];
+        ++_g;
+        if (child.hasOwnProperty("update")) {
+          child.update();
+        }
+      }
+    }
+    updateBackground() {
+      let bm = new Bitmap();
+      bm.context.fillStyle = this.bgColor;
+      let color = StringTools.replace(bm.context.fillStyle, "#", "0x");
+      this.fill = parseInt(color, 10);
+      this.beginFill();
+      this.drawRect(0, 0, this.width, this.height);
+      this.endFill();
+    }
+  }
+
+  widgets_Panel.__name__ = true;
+  class widgets_GridPanel extends widgets_Panel {
+    constructor(config) {
+      super(config);
+    }
+    set(config) {
+      super.set(config);
+      let gridPanelConfig = config;
+      this.cols = gridPanelConfig.cols;
+      this.rows = gridPanelConfig.rows;
+    }
+  }
+
+  widgets_GridPanel.__name__ = true;
   class OxLabel extends Sprite {
     constructor(labelConfig) {
       super();

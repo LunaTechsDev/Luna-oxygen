@@ -1,3 +1,4 @@
+import widgets.Panel;
 import widgets.Gauge;
 import macros.FnMacros;
 import rm.windows.Window_Base as RmWindow_Base;
@@ -24,10 +25,19 @@ class Main {
       height: 25,
       rate: .70,
       bgColor: 'black',
-      color: 'red',
+      color: 'white',
       leftStyle: LBOX,
       rightStyle: RARROW,
     });
+
+    var panel = new Panel({
+      x: 200,
+      y: 300,
+      width: 250,
+      height: 250,
+      bgColor: 'pink'
+    });
+    panel.addChild(gauge);
     trace(gauge);
   }
 }

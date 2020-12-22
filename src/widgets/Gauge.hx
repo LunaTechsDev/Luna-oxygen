@@ -93,7 +93,10 @@ class Gauge extends Sprite {
         ctx.lineTo((this.width - (this.height / 2)) * rate, 0);
         ctx.lineTo(this.width * rate, this.height / 2);
         ctx.lineTo((this.width - (this.height / 2)) * rate, this.height);
-      // Do nothing
+      case LARROW:
+        ctx.lineTo(this.width * rate, 0);
+        ctx.lineTo((this.width - (this.height / 2)) * rate, this.height / 2);
+        ctx.lineTo(this.width * rate, this.height);
       case RSLANT:
         ctx.lineTo(this.width * rate, 0);
         ctx.lineTo((this.width - (this.height / 2)) * rate, this.height);
