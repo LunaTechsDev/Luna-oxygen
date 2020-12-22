@@ -44,6 +44,7 @@ class BitmapExt {
     context.lineTo(x2, y2);
     context.lineTo(x3, y3);
     context.fill();
+    updateTexture(bitmap);
   }
 
   public static function strokeTriangle(bitmap: Bitmap, strokeStyle: String, x1: Float, y1: Float, x2: Float,
@@ -56,6 +57,7 @@ class BitmapExt {
     context.lineTo(x2, y2);
     context.lineTo(x3, y3);
     context.stroke();
+    updateTexture(bitmap);
   }
 
   public static function strokeRndRect(bitmap: Bitmap, strokeStyle: String, x: Float, y: Float, width: Float,
@@ -75,6 +77,7 @@ class BitmapExt {
     ctx.arcTo(x, y, x, y + radius, radius);
     ctx.stroke();
     ctx.restore();
+    updateTexture(bitmap);
   }
 
   public static function fillRndRect(bitmap: Bitmap, color: String, x: Float, y: Float, width: Float, height: Float,
@@ -94,6 +97,7 @@ class BitmapExt {
     ctx.arcTo(x, y, x, y + radius, radius);
     ctx.fill();
     ctx.restore();
+    updateTexture(bitmap);
   }
 
   public static inline function updateTexture(bitmap: Bitmap) {

@@ -20,11 +20,13 @@ class Main {
     var gauge = new Gauge({
       x: 100,
       y: 100,
-      width: 50,
-      height: 100,
+      width: 100,
+      height: 25,
       rate: .70,
       bgColor: 'black',
-      color: 'red'
+      color: 'red',
+      leftStyle: LBOX,
+      rightStyle: RARROW,
     });
     trace(gauge);
   }

@@ -9,4 +9,6 @@ class Layout extends Container {
   public function childrenCount() {
     return this.children.length;
   }
+
+  public function organizeElements() {}
 }

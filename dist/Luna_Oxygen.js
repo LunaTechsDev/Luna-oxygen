@@ -85,13 +85,15 @@ SOFTWARE
       let gauge = new OxGauge({
         x: 100,
         y: 100,
-        width: 50,
-        height: 100,
+        width: 100,
+        height: 25,
         rate: 0.7,
         bgColor: "black",
         color: "red",
+        leftStyle: "lB",
+        rightStyle: "rA",
       });
-      console.log("src/Main.hx:29:", gauge);
+      console.log("src/Main.hx:31:", gauge);
     }
   }
 
@@ -259,6 +261,26 @@ SOFTWARE
 
   $hx_exports["OxUISystem"] = OxUISystem;
   OxUISystem.__name__ = true;
+  class OxButton extends Sprite {
+    constructor(config) {
+      super();
+      this.set(config);
+    }
+    set(config) {
+      this.x = config.x;
+      this.y = config.y;
+      this.width = config.width;
+      this.height = config.height;
+      this.color = config.color;
+      this.onClickFn = config.onClick;
+    }
+    onClick() {
+      this.onClickFn();
+    }
+  }
+
+  $hx_exports["OxButton"] = OxButton;
+  OxButton.__name__ = true;
   class OxGauge extends Sprite {
     constructor(config) {
       super();
@@ -273,12 +295,61 @@ SOFTWARE
       this.rate = config.rate;
       this.bgColor = config.bgColor;
       this.color = config.color;
+      this.leftStyle = config.leftStyle;
+      this.rightStyle = config.rightStyle;
     }
     update() {
       super.update();
       this.updateGauge();
     }
-    updateGauge() {}
+    updateGauge() {
+      this.bitmap.clear();
+      this.paintGauge();
+    }
+    paintGauge() {
+      let ctx = this.bitmap.context;
+      ctx.save();
+      ctx.beginPath();
+      switch (this.leftStyle) {
+        case "lA":
+          ctx.moveTo(this.height / 2, this.height);
+          ctx.lineTo(0, this.height / 2);
+          ctx.lineTo(this.height / 2, 0);
+          break;
+        case "lB":
+          ctx.moveTo(0, this.height);
+          ctx.lineTo(0, 0);
+          break;
+        case "lS":
+          ctx.moveTo(this.height / 2, this.height);
+          ctx.lineTo(0, this.height);
+          break;
+        default:
+      }
+
+      switch (this.rightStyle) {
+        case "rA":
+          ctx.lineTo(this.width - this.height / 2, 0);
+          ctx.lineTo(this.width, this.height / 2);
+          ctx.lineTo(this.width - this.height / 2, this.height);
+          break;
+        case "rB":
+          ctx.lineTo(this.width, 0);
+          ctx.lineTo(this.width, this.height);
+          break;
+        case "rS":
+          ctx.lineTo(this.width, 0);
+          ctx.lineTo(this.width - this.height / 2, this.height);
+          break;
+        default:
+      }
+
+      ctx.closePath();
+      ctx.fillStyle = this.color;
+      ctx.fill();
+      this.bitmap._baseTexture.update();
+      ctx.restore();
+    }
   }
 
   $hx_exports["OxGauge"] = OxGauge;
@@ -331,6 +402,7 @@ SOFTWARE
     childrenCount() {
       return this.children.length;
     }
+    organizeElements() {}
   }
 
   $hx_exports["OxLayout"] = OxLayout;

@@ -39,6 +39,8 @@ class Gauge extends Sprite {
     this.rate = config.rate;
     this.bgColor = config.bgColor;
     this.color = config.color;
+    this.leftStyle = config.leftStyle;
+    this.rightStyle = config.rightStyle;
   }
 
   override public function update() {
@@ -46,5 +48,64 @@ class Gauge extends Sprite {
     this.updateGauge();
   }
 
-  public function updateGauge() {}
+  public function updateGauge() {
+    this.bitmap.clear();
+    this.paintGauge();
+  }
+
+  public function paintGauge() {
+    var ctx = this.bitmap.context;
+    ctx.save();
+    ctx.beginPath();
+    switch (this.leftStyle) {
+      case LBOX:
+        // Start from Bottom Left
+        ctx.moveTo(0, this.height);
+        ctx.lineTo(0, 0);
+      case LARROW:
+        ctx.moveTo(this.height / 2, this.height);
+        ctx.lineTo(0, this.height / 2);
+        ctx.lineTo(this.height / 2, 0);
+      // Do nothing
+      case LSLANT:
+        ctx.moveTo(this.height / 2, this.height);
+        ctx.lineTo(0, this.height);
+      case RSLANT:
+        ctx.moveTo(0, this.height);
+        ctx.lineTo(this.height / 2, this.height);
+      case _:
+        // Do nothing
+    }
+
+    // Mid Section
+
+    switch (this.rightStyle) {
+      case RBOX:
+        // Do nothing
+        ctx.lineTo(this.width, 0);
+        ctx.lineTo(this.width, this.height);
+
+      // Close Shape
+
+      case RARROW:
+        ctx.lineTo(this.width - (this.height / 2), 0);
+        ctx.lineTo(this.width, this.height / 2);
+        ctx.lineTo(this.width - (this.height / 2), this.height);
+      // Do nothing
+      case RSLANT:
+        ctx.lineTo(this.width, 0);
+        ctx.lineTo(this.width - (this.height / 2), this.height);
+      case LSLANT:
+        ctx.lineTo(this.width - (this.height / 2), 0);
+        ctx.lineTo(this.width, this.height);
+
+      case _:
+        // Do nothing
+    }
+    ctx.closePath();
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    this.bitmap.updateTexture();
+    ctx.restore();
+  }
 }
